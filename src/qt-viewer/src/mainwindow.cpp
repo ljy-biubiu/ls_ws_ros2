@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/visualization/pcl_visualizer.h>
 
 MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     : QMainWindow(parent), my_app(my_app_)
@@ -103,7 +105,7 @@ void MainWindow::updatePointCould()
     static PointCloudTPtr msg;
     msg.reset(new PointCloudT);
 
-    //this->params_event->getTotalParams().drive.lidar_drive.get_lidar_data(msg);
+    // this->params_event->getTotalParams().drive.lidar_drive.get_lidar_data(msg);
 
     paint_area->xCloud->clear();
     *paint_area->xCloud = *msg;
@@ -117,6 +119,8 @@ void MainWindow::updatePointCould()
     this->viewer->getRenderWindow()->GetInteractor()->Render();
     qvtkOpenglNativeWidget->update();
 }
+
+
 
 void MainWindow::receive_lidar_driver(PointCloudTPtr msg)
 {
@@ -126,14 +130,21 @@ void MainWindow::receive_lidar_driver(PointCloudTPtr msg)
     paint_area->update();
 
     std::string name = "All_cloud";
+
     this->viewer->removePointCloud(name);
-    this->viewer->addPointCloud(msg, name);
+    //pcl::visualization::PointCloudColorHandlerGenericField<PointT> single_color(msg, "z"); /// deep different color
+    viewer->addPointCloud(msg, name);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, name);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR,1,1,1, name);
+
+    // this->viewer->removePointCloud(name);
+    // this->viewer->addPointCloud(msg, name);
     this->viewer->updatePointCloud(msg, name);
 
     this->viewer->getRenderWindow()->GetInteractor()->Render();
     qvtkOpenglNativeWidget->update();
 }
-//PointCloudTPtr
+// PointCloudTPtr
 
 void MainWindow::initPointCShow()
 {
@@ -335,9 +346,8 @@ void MainWindow::initConnect()
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer2, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_lidar_drive(PointCloudTPtr)), this, SLOT(receive_lidar_driver(PointCloudTPtr)));
-    QObject::connect(this, SIGNAL(uploadLog(QMultiMap<QString, QString>)), this, SLOT(receive_lidar_driver(QMultiMap<QString, QString>)));
+    // QObject::connect(this, SIGNAL(uploadLog(QMultiMap<QString, QString>)), this, SLOT(receive_lidar_driver(QMultiMap<QString, QString>)));
     QObject::connect(ros_talk, SIGNAL(emit_show_log(QString)), diary, SLOT(show_log(QString)));
-    
 }
 
 void MainWindow::createActions()

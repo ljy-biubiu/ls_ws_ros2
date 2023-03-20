@@ -39,7 +39,7 @@ find_package(Qt5 REQUIRED COMPONENTS Core WebEngineWidgets Widgets WebChannel We
 
 set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5WebEngineWidgets_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
 
-set(UI_FILES ./UI/src/smsdialog.ui ./UI/src/aboutdialog.ui 
+ set(UI_FILES ./UI/src/smsdialog.ui ./UI/src/aboutdialog.ui 
         ./UI/src/addpolygon.ui ./UI/src/cameraviewer.ui ./UI/src/childtitlebar.ui
          ./UI/src/maintitlebar.ui ./UI/src/setroi.ui ./UI/src/webui.ui )
 
@@ -50,8 +50,7 @@ find_package(PkgConfig REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(cv_bridge REQUIRED)
-find_package(sys_msgs REQUIRED)
+find_package(cv_bridge REQUIRED) 
 
 # find_package(Qt5 COMPONENTS ${REQUIRED_LIBS} REQUIRED)
 FIND_PACKAGE(Qt5Widgets REQUIRED NO_DEFAULT_PATH)
@@ -114,7 +113,6 @@ ament_target_dependencies(${PROJECT_NAME}_node
         "std_msgs"
         "sensor_msgs"
         "cv_bridge"
-        "sys_msgs"
         )
 
 if(BUILD_TESTING)
