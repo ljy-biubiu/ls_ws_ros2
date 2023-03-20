@@ -1,0 +1,451 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>镭神智能安防监控</title>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script src="./js/qwebchannel.js"></script>
+    <link rel="stylesheet" href="css/comon0.css">
+    <style>
+        .grid {
+            margin-top: 5%;
+            width: 80%;
+            height: 10px;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-column-gap: 14px;
+        }
+
+        .line {
+            position: relative;
+            width: 90%;
+            height: 7px;
+        }
+
+        .line::before,
+        .line::after {
+            content: '';
+            position: absolute;
+            width: 4.5rem;
+            height: 100%;
+            border-radius: 7px;
+            background-color: #FF0000;
+        }
+
+        .line::before {
+            animation: first-line ease-in-out 4s var(--delay) infinite alternate;
+        }
+
+        .line::after {
+            bottom: 0;
+            background-color: #B22222;
+            width: calc(80% - 10px);
+            animation: second-line ease-in-out 4s var(--delay) infinite alternate;
+        }
+
+        .line:nth-child(1) {
+            --delay: calc(-0.1s);
+        }
+
+        /*去除百度地图版权*/
+        .anchorBL {
+            display: none;
+        }
+
+
+        @keyframes first-line {
+            70% {
+                width: calc(80% - 10px);
+            }
+
+            100% {
+                background-color: #FF0000;
+            }
+        }
+    </style>
+</head>
+
+<!-- <script>
+    function fuckyou() {
+        window.close(); //关闭当前窗口(防抽)
+        window.location = "about:blank"; //将当前窗口跳转置空白页
+    }
+    function ck() {
+        console.profile();
+        console.profileEnd();
+        //我们判断一下profiles里面有没有东西，如果有，肯定有人按F12了，没错！！
+        if (console.clear) { console.clear() };
+        if (typeof console.profiles == "object") {
+            return console.profiles.length > 0;
+        }
+    }
+    function hehe() {
+        if ((window.console && (console.firebug || console.table && /firebug/i.test(console.table()))) || (typeof opera == 'object' && typeof
+
+            opera.postError == 'function' && console.profile.length > 0)) {
+            fuckyou();
+        }
+        if (typeof console.profiles == "object" && console.profiles.length > 0) {
+            fuckyou();
+        }
+    }
+    hehe();
+    window.onresize = function () {
+        if ((window.outerHeight - window.innerHeight) > 200)
+            //判断当前窗口内页高度和窗口高度，如果差值大于200，那么呵呵
+            fuckyou();
+        if ((window.outerWidth - window.innerWidth) > 200)
+            //判断当前窗口内页高度和窗口宽度，如果差值大于200，那么呵呵
+            fuckyou();
+    }
+</script> -->
+
+<script type="text/javascript">
+    var html2 = $(".adduser ul").html()
+    $(".adduser ul").append(html2)
+
+    $(document).ready(function () {
+        var html = $(".wrap ul").html()
+        $(".wrap ul").append(html)
+        var ls = $(".wrap li").length / 2 + 1
+        i = 0
+        ref = setInterval(function () {
+            i++
+            if (i == ls) {
+                i = 1
+                $(".wrap ul").css({ marginTop: 0 })
+                $(".wrap ul").animate({ marginTop: -'.52' * i + 'rem' }, 1000)
+            }
+            $(".wrap ul").animate({ marginTop: -'.52' * i + 'rem' }, 1000)
+
+
+        }, 2400);
+
+
+
+        // var html2 = $(".adduser ul").html()
+        // $(".adduser ul").append(html2)
+        //var ls2 = $(".adduser li").length / 2 + 1
+        //var a = 0
+        // $(".adduser ul").css({ marginTop: -'2 rem' })
+        // $(".adduser ul").animate({ marginTop: '1 rem' })
+        //$(".adduser ul").css({ marginTop: -'4 rem' })
+        //$(".adduser ul").css({ marginTop: '-0.5rem' })
+        $(".adduser ul").css({ marginTop: '-0.5rem' })
+        // ref = setInterval(function () {
+        //     a++
+        //     $(".adduser ul").css({ marginTop: '-0.5rem' })
+        //     if (a == ls2) {
+        //         a = 1
+        //         $(".adduser ul").css({ marginTop: 0 })
+        //         $(".adduser ul").animate({ marginTop: -'.5' * a + 'rem' }, 800)
+        //     }
+        //     $(".adduser ul").animate({ marginTop: +'.5' * a + 'rem' }, 800)
+        // }, 100000);
+
+
+    });
+
+    function resetPosition() {
+
+        for (var i = 9; 1 < i; i--) {
+            document.getElementById("warm_data" + i).innerHTML = document.getElementById("warm_data" + (i - 1)).innerHTML;
+            document.getElementById("warm_time" + i).innerHTML = document.getElementById("warm_time" + (i - 1)).innerHTML;
+        }
+        $(".adduser ul").css({ marginTop: '-0.5rem' });//
+    }
+
+    var warm_queue = [];
+    var warm_data = [];
+    var warm_queue_cnt = 0;
+    new QWebChannel(qt.webChannelTransport, function (channel) {
+        // 注意：这个doc我不是乱写，是QT那边指定的是什么，这里就用什么
+        // 这个doc就相当于QT的一个对象了，可以调用QT那边的槽函数
+        window.doc = channel.objects.doc
+        // cpp通过signalToWeb信号给web传值:response
+        //$(".adduser ul").css({ marginTop: '-0.5rem' })
+        doc.signalToWeb.connect(function (response) {
+            //window.alert(response.header);
+            // response是QT传过来的Json格式数据，需要使用对应的键才能获取对应的值
+            var text = response["warm_datas"];
+
+            // console.warn(response["warm_datas"]);
+            // console.warn(response["pointcloud"]);
+            var jsonObj;
+            //解析报警数据
+            if (response["warm_datas"]) {
+                jsonObj = window.JSON.parse(response["warm_datas"]);
+
+                document.getElementById("warm_data1").innerHTML = jsonObj.name;
+                document.getElementById("warm_time1").innerHTML = jsonObj.time;
+
+                $(".adduser ul").animate({ marginTop: '0rem' }, 800)
+
+                window.setTimeout(resetPosition, 1000);
+
+            }
+            // 下面所作的操作就相当于尾部追加显示数据
+        })
+    });
+    // console.log("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[");
+    // console.error("你得多次肉肉");
+    // document.getElementById("test1").innerHTML = "ddddddddddddddddddddddddddddddd";
+</script>
+
+
+<body style='overflow:-Scroll;overflow-y:hidden'>
+    <div class="loading">
+        <div class="loadbox"> <img src="images/loading.gif"> 页面加载中... </div>
+    </div>
+    <div class="head">
+        <!--<h1>镭神智能安防监控</h1>
+        <div class="weather"><span id="showTime"></span></div>
+        <script>
+            var t = null;
+            t = setTimeout(time, 1000);
+            function time() {
+                clearTimeout(t);
+                dt = new Date();
+                var y = dt.getFullYear();
+                var mt = dt.getMonth() + 1;
+                var day = dt.getDate();
+                var h = dt.getHours();
+                var m = dt.getMinutes();
+                var s = dt.getSeconds();
+                document.getElementById("showTime").innerHTML = y + "年" + mt + "月" + day + "-" + h + "时" + m + "分" + s + "秒";
+                t = setTimeout(time, 1000);
+            }
+
+        </script>-->
+    </div>
+    <div class="mainbox">
+        <ul class="clearfix">
+            <li>
+                <div class="boxall" style="height: 5.2rem" >
+                    <div class="alltitle">主机报警</div>
+                    <div class="sycm">
+                        <ul class="clearfix">
+                            <li>
+                                <h2>1824</h2><span>本月报警数量</span>
+                            </li>
+                            <li>
+                                <h2>1920</h2><span>上月报警数量</span>
+                            </li>
+                            <li>
+                                <h2>5%</h2><span>环比增长</span>
+                            </li>
+                        </ul>
+                        <div style="border-bottom: 1px solid rgba(255,255,255,.1)"></div>
+                        <ul class="clearfix">
+                            <li>
+                                <h2>824</h2><span>主机(20001)</span>
+                            </li>
+                            <li>
+                                <h2>710</h2><span>主机(20003)</span>
+                            </li>
+                            <li>
+                                <h2>200</h2><span>主机(20002)</span>
+                            </li>
+                        </ul>
+
+
+                    </div>
+                    <!-- <div class="addnew">
+                        <div class="tit02"><span>误报种类</span></div>
+                        <div class="allnav" style="height: 2.2rem" id="wbzl"></div>
+                    </div> -->
+                    <div class="boxfoot"></div>
+                </div>
+                <div class="boxall" style="height: 4.2rem">
+                    <!-- <div >监测区域</div> -->
+                    <div class="allnav" style="height: 3.6rem; margin-top: 0.3rem" id="myMap"></div>
+                    <!-- <div class="addnew">
+                        <div class="tit02"><span>误报种类</span></div>
+                        <div class="allnav" style="height: 2.0rem" id="wwbzl"></div>
+                    </div> -->
+                    <div class="boxfoot"></div>
+                </div>
+            </li>
+            <li>
+                <div class="bar">
+                    <div class="barbox ">
+                        <ul class="clearfix">
+                            <li class="pulll_left counter">
+                                6069
+                            </li>
+                            <li class="pulll_left counter">410</li>
+                        </ul>
+                    </div>
+                    <div class="barbox2">
+                        <ul class="clearfix">
+                            <li class="pulll_left">联网单位数量</li>
+                            <li class="pulll_left">联网主机数量</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="barbox">
+                        <ul class="clearfix">
+                            <li class="pulll_left counter">81189</li>
+                            <li class="pulll_left counter">39410</li>
+                        </ul>
+                    </div>
+                    <div class="barbox2">
+                        <ul class="clearfix">
+                            <li class="pulll_left">监测点位数量</li>
+                            <li class="pulll_left">总报警数量</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="map">
+                    <div class="map1"><img src="images/lbx.png"></div>
+                    <div class="map2"><img src="images/jt.png"></div>
+                    <div class="map3"><img src="images/map.png"></div>
+                    <div class="map4" id="map_1"></div>
+                </div>
+                <div  style="height: 3rem; color:white; " id="my_DynChart" >
+                    <!-- <div class="alltitle">地图</div> -->
+                    <!-- <div class="allnav" id="myMap" style="width:7.2rem;height:3rem;margin-top: 0.3rem"></div> -->
+                    <!-- <div class="boxfoot"></div> -->
+                </div>
+            </li>
+            <li>
+                <div class="boxall" style="height:3.8rem">
+
+                    <!-- <div class="clearfix">
+                        <div class="sy" style="width:300px;" id="yqbj"></div>
+                    </div> -->
+                    <div class="addnew">
+                        <!-- <div class="tit02"><span>最新报警</span></div> -->
+                        <div class="left-center" style="height: 3rem" >
+                            <div >
+                                <h6 style="font-size:0.2rem;color: #cdddf7;  text-align: center;margin-top: 0.3rem;">各区域报警量占比</h6>
+                            </div>
+                            <div class="chart-box pie-chart">
+                                <div id="pie"></div>
+                                <div>
+                                    <div class="pie-data"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="boxfoot"></div>
+                </div>
+                <div class="boxall" style="height: 1.4rem">
+                    <!-- <div class="alltitle">红外报警</div> -->
+                    <!-- <div class="grid">
+                        <span class="line"></span>
+                    </div> -->
+                    <div>
+                        <table class="table3" style="border:0px; width:96%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <h6 style="font-size:0.2rem;color: #cdddf7;">状态</h6>
+                                    </th>
+                                    <th style="text-align:left;">
+                                        <div class="breathe-zct"></div>&nbsp;&nbsp;正常
+                                    </th>
+                                    <th style="text-align:left">
+                                        <div class="breathe-yct"></div>&nbsp;&nbsp;异常
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody style="border:0px;">
+                                <!--<tr><td colspan="4"><p style="width:9.6rem;">暂无数据</p></td></tr>-->
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr style="border:0px;">
+                                    <td style="border:0px;" id="dx" class="breathe-zc">
+                                    </td>
+                                    <td style="border:0px;" id="cz" class="breathe-zc">
+                                    </td>
+                                    <td style="border:0px;" id="dmt" class="breathe-yc">
+                                    </td>
+                                </tr>
+                                <tr style="border:0px;text-align: center;">
+                                    <!-- <td style="border:0px;"></td> -->
+                                    <td style="border:0px;">网络通讯</td>
+                                    <td style="border:0px;">监控状态</td>
+                                    <td style="border:0px;">其他</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="boxfoot"></div>
+                </div>
+                <div class="boxall" style="height: 4.1rem">
+                    <div class="alltitle">入侵报警</div>
+                    <div class="adduser" style="height: 3.0rem">
+                        <ul>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data1">null</span> <span
+                                    class="pulll_right" id="warm_time1">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data2">null</span> <span
+                                    class="pulll_right" id="warm_time2">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data3">null</span> <span
+                                    class="pulll_right" id="warm_time3">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data4">null</span> <span
+                                    class="pulll_right" id="warm_time4">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data5">null</span> <span
+                                    class="pulll_right" id="warm_time5">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data6">null</span> <span
+                                    class="pulll_right" id="warm_time6">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data7">null</span> <span
+                                    class="pulll_right" id="warm_time7">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data8">null</span> <span
+                                    class="pulll_right" id="warm_time8">null </span> </li>
+                            <li class="clearfix"> <span class="pulll_left" id="warm_data9">null</span> <span
+                                    class="pulll_right" id="warm_time9">null </span> </li>
+
+                        </ul>
+                    </div>
+                    <!-- <div class="allnav" style="height: 1.0rem"></div> -->
+                    <!-- <div class="left-top" >
+                        <div class="current-num">
+                            <div>各区域报警</div>
+                            <p>123,456,789</p>
+                        </div>
+                    </div> -->
+                    <!-- <div class="left-center" style="height: 3rem" >
+                        <div >
+                            <h6 style="font-size:0.2rem;color: #cdddf7;  text-align: center;margin-top: 0.3rem;">各区域报警量占比</h6>
+                        </div>
+                        <div class="chart-box pie-chart">
+                            <div id="pie"></div>
+                            <div>
+                                <div class="pie-data"></div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <div class="boxfoot"></div>
+                </div>
+            </li>
+        </ul>
+
+    </div>
+    <div class="back"></div>
+    <script type="text/javascript" src="js/echarts.min.js"></script>
+    <script type="text/javascript" src="js/echarts-gl.min.js"></script>
+    <script language="JavaScript" src="js/echarts-tool1.js"></script>
+    <script type="text/javascript" src="js/timelineOption.js"></script>
+
+    <script type="text/javascript" src="./js/bmap.js"></script>
+    <script src="https://api.map.baidu.com/getscript?v=3.0&amp;ak=5YWVlOyr38nVLezWWGBoQNavGkxRONG9"></script>
+    <script type="text/javascript"></script>
+
+    <script type="text/javascript" src="js/jquery.waypoints.min.js"></script>
+    <script type="text/javascript" src="js/jquery.countup.min.js"></script>
+    <script type="text/javascript">
+        $('.counter').countUp();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>镭神智能安防监控</title>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script src="./js/qwebchannel.js"></script>
+    <style>
+        .grid {
+            margin-top: 5%;
+            width: 80%;
+            height: 10px;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-column-gap: 14px;
+        }
+
+        .line {
+            position: relative;
+            width: 90%;
+            height: 7px;
+        }
+
+        .line::before,
+        .line::after {
+            content: '';
+            position: absolute;
+            width: 4.5rem;
+            height: 100%;
+            border-radius: 7px;
+            background-color: #FF0000;
+        }
+
+        .line::before {
+            animation: first-line ease-in-out 4s var(--delay) infinite alternate;
+        }
+
+        .line::after {
+            bottom: 0;
+            background-color: #B22222;
+            width: calc(80% - 10px);
+            animation: second-line ease-in-out 4s var(--delay) infinite alternate;
+        }
+
+        .line:nth-child(1) {
+            --delay: calc(-0.1s);
+        }
+
+        /*去除百度地图版权*/
+        .anchorBL {
+            display: none;
+        }
+
+
+        @keyframes first-line {
+            70% {
+                width: calc(80% - 10px);
+            }
+
+            100% {
+                background-color: #FF0000;
+            }
+        }
+    </style>
+</head>
+
+<!-- <script>
+    function fuckyou() {
+        window.close(); //关闭当前窗口(防抽)
+        window.location = "about:blank"; //将当前窗口跳转置空白页
+    }
+    function ck() {
+        console.profile();
+        console.profileEnd();
+        //我们判断一下profiles里面有没有东西，如果有，肯定有人按F12了，没错！！
+        if (console.clear) { console.clear() };
+        if (typeof console.profiles == "object") {
+            return console.profiles.length > 0;
+        }
+    }
+    function hehe() {
+        if ((window.console && (console.firebug || console.table && /firebug/i.test(console.table()))) || (typeof opera == 'object' && typeof
+
+            opera.postError == 'function' && console.profile.length > 0)) {
+            fuckyou();
+        }
+        if (typeof console.profiles == "object" && console.profiles.length > 0) {
+            fuckyou();
+        }
+    }
+    hehe();
+    window.onresize = function () {
+        if ((window.outerHeight - window.innerHeight) > 200)
+            //判断当前窗口内页高度和窗口高度，如果差值大于200，那么呵呵
+            fuckyou();
+        if ((window.outerWidth - window.innerWidth) > 200)
+            //判断当前窗口内页高度和窗口宽度，如果差值大于200，那么呵呵
+            fuckyou();
+    }
+</script> -->
+
+<script type="text/javascript">
+    var html2 = $(".adduser ul").html()
+    $(".adduser ul").append(html2)
+
+    $(document).ready(function () {
+        var html = $(".wrap ul").html()
+        $(".wrap ul").append(html)
+        var ls = $(".wrap li").length / 2 + 1
+        i = 0
+        ref = setInterval(function () {
+            i++
+            if (i == ls) {
+                i = 1
+                $(".wrap ul").css({ marginTop: 0 })
+                $(".wrap ul").animate({ marginTop: -'.52' * i + 'rem' }, 1000)
+            }
+            $(".wrap ul").animate({ marginTop: -'.52' * i + 'rem' }, 1000)
+
+
+        }, 2400);
+
+
+
+        // var html2 = $(".adduser ul").html()
+        // $(".adduser ul").append(html2)
+        //var ls2 = $(".adduser li").length / 2 + 1
+        //var a = 0
+        // $(".adduser ul").css({ marginTop: -'2 rem' })
+        // $(".adduser ul").animate({ marginTop: '1 rem' })
+        //$(".adduser ul").css({ marginTop: -'4 rem' })
+        //$(".adduser ul").css({ marginTop: '-0.5rem' })
+        $(".adduser ul").css({ marginTop: '-0.5rem' })
+        // ref = setInterval(function () {
+        //     a++
+        //     $(".adduser ul").css({ marginTop: '-0.5rem' })
+        //     if (a == ls2) {
+        //         a = 1
+        //         $(".adduser ul").css({ marginTop: 0 })
+        //         $(".adduser ul").animate({ marginTop: -'.5' * a + 'rem' }, 800)
+        //     }
+        //     $(".adduser ul").animate({ marginTop: +'.5' * a + 'rem' }, 800)
+        // }, 100000);
+
+
+    });
+
+    function resetPosition() {
+
+        for (var i = 9; 1 < i; i--) {
+            document.getElementById("warm_data" + i).innerHTML = document.getElementById("warm_data" + (i - 1)).innerHTML;
+            document.getElementById("warm_time" + i).innerHTML = document.getElementById("warm_time" + (i - 1)).innerHTML;
+        }
+        $(".adduser ul").css({ marginTop: '-0.5rem' });//
+    }
+
+    var warm_queue = [];
+    var warm_data = [];
+    var warm_queue_cnt = 0;
+    new QWebChannel(qt.webChannelTransport, function (channel) {
+        // 注意：这个doc我不是乱写，是QT那边指定的是什么，这里就用什么
+        // 这个doc就相当于QT的一个对象了，可以调用QT那边的槽函数
+        window.doc = channel.objects.doc
+        // cpp通过signalToWeb信号给web传值:response
+        //$(".adduser ul").css({ marginTop: '-0.5rem' })
+        doc.signalToWeb.connect(function (response) {
+            //window.alert(response.header);
+            // response是QT传过来的Json格式数据，需要使用对应的键才能获取对应的值
+            var text = response["warm_datas"];
+
+            // console.warn(response["warm_datas"]);
+            // console.warn(response["pointcloud"]);
+            var jsonObj;
+            //解析报警数据
+            if (response["warm_datas"]) {
+                jsonObj = window.JSON.parse(response["warm_datas"]);
+
+                document.getElementById("warm_data1").innerHTML = jsonObj.name;
+                document.getElementById("warm_time1").innerHTML = jsonObj.time;
+
+                $(".adduser ul").animate({ marginTop: '0rem' }, 800)
+
+                window.setTimeout(resetPosition, 1000);
+
+            }
+            // 下面所作的操作就相当于尾部追加显示数据
+        })
+    });
+    // console.log("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[");
+    // console.error("你得多次肉肉");
+    // document.getElementById("test1").innerHTML = "ddddddddddddddddddddddddddddddd";
+</script>
+
+
+<body>
+
+    <div style="height: 3rem; color:white; " id="my_DynChart">
+    </div>
+
+    </div>
+    <div class="back"></div>
+    <script type="text/javascript" src="js/echarts.min.js"></script>
+    <script type="text/javascript" src="js/echarts-gl.min.js"></script>
+    <script language="JavaScript" src="js/echarts-tool1.js"></script>
+    <script type="text/javascript" src="js/timelineOption.js"></script>
+
+    <script type="text/javascript" src="./js/bmap.js"></script>
+    <script src="https://api.map.baidu.com/getscript?v=3.0&amp;ak=5YWVlOyr38nVLezWWGBoQNavGkxRONG9"></script>
+    <script type="text/javascript"></script>
+
+    <script type="text/javascript" src="js/jquery.waypoints.min.js"></script>
+    <script type="text/javascript" src="js/jquery.countup.min.js"></script>
+    <script type="text/javascript">
+        $('.counter').countUp();
+    </script>
+
+</body>
+
+</html>

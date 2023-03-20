@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>网页图像显示测试</title>
+	<meta charset="utf-8">
+	<!-- <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"> -->
+	<meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+	<meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+	<meta HTTP-EQUIV="Expires" CONTENT="0">
+	<link type="text/css" rel="stylesheet" href="../main.css">
+
+   	 <script src='../js/jquery.min.js'></script>
+    	<script src='../js/webtalk.js'></script>
+
+	<script>
+
+	var timer = setInterval(function () 
+	{
+		var ima = document.getElementById("tus");
+		ima.src = receive_image_data;
+	}, 50)
+		
+</script>
+
+
+</head>
+
+
+<body>
+
+
+	<!-- <div id="header" style="background-color:#FFA500;">
+		<h1 style="margin-bottom:0;">主要的网页标题</h1>
+	</div> -->
+  <h1 style="margin-bottom:0;">主要的网页标题</h1>
+  <div align="center">
+	  <img  id="tus"  >
+  </div>
+
+

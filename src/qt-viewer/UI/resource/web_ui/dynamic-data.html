@@ -1,0 +1,240 @@
+<!--
+	THIS EXAMPLE WAS DOWNLOADED FROM https://echarts.apache.org/examples/en/editor.html?c=dynamic-data&theme=dark
+-->
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+
+<head>
+  <meta charset="utf-8">
+</head>
+
+<body style="height: 100%; margin: 0">
+  <div id="container" style="height: 100%"></div>
+  <script type="text/javascript" src="js/jquery.js"></script>
+  <script src="./js/qwebchannel.js"></script>
+
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.0/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-stat@latest/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.0/dist/extension/bmap.min.js"></script>
+  -->
+
+  <script type="text/javascript">
+
+    var biaoti;
+    var qt_data = 5;
+
+    // new QWebChannel(qt.webChannelTransport, function (channel) {
+    //   // 注意：这个doc我不是乱写，是QT那边指定的是什么，这里就用什么
+    //   // 这个doc就相当于QT的一个对象了，可以调用QT那边的槽函数
+    //   window.doc = channel.objects.doc
+    //   // cpp通过signalToWeb信号给web传值:response
+    //   //$(".adduser ul").css({ marginTop: '-0.5rem' })
+    //   doc.signalToWeb.connect(function (response) {
+    //     //window.alert(response.header);
+    //     // response是QT传过来的Json格式数据，需要使用对应的键才能获取对应的值
+    //     var text = response["warm_datas"];
+
+    //     // console.warn("dasdasdsassss");
+    //     // console.warn(response["warm_datas"]);
+    //     // console.warn(response["pointcloud"]);
+    //     var jsonObj;
+    //     qt_data++;
+    //     //解析报警数据
+    //     if (response["warm_datas"]) {
+    //       jsonObj = window.JSON.parse(response["warm_datas"]);
+
+    //       // document.getElementById("warm_data1").innerHTML = jsonObj.name;
+    //       // document.getElementById("warm_time1").innerHTML = jsonObj.time;
+
+    //       biaoti = jsonObj.time;
+
+    //       $(".adduser ul").animate({ marginTop: '0rem' }, 800)
+
+    //       //window.setTimeout(resetPosition, 1000);
+
+    //     }
+    //     // 下面所作的操作就相当于尾部追加显示数据
+    //   })
+    // });
+
+
+
+
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, 'dark', {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+    var app = {};
+
+    var option;
+
+    const categories = (function () {
+      let now = new Date();
+      let res = [];
+      let len = 10;
+      while (len--) {
+        res.unshift(now.toLocaleTimeString().replace(/^\D*/, ''));
+        now = new Date(+now - 2000);
+      }
+      return res;
+    })();
+    const categories2 = (function () {
+      let res = [];
+      let len = 10;
+      while (len--) {
+        res.push(10 - len - 1);
+      }
+      return res;
+    })();
+    const data = (function () {
+      let res = [];
+      let len = 10;
+      while (len--) {
+        res.push(Math.round(Math.random() * 1000));
+      }
+      return res;
+    })();
+    const data2 = (function () {
+      let res = [];
+      let len = 0;
+      while (len < 10) {
+        res.push(+(Math.random() * 10 + 5).toFixed(1));
+        len++;
+      }
+      return res;
+    })();
+    option = {
+      title: {
+        text: biaoti
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross',
+          label: {
+            backgroundColor: '#283b56'
+          }
+        }
+      },
+      legend: {				
+				selected:{
+					'Dynamic Bar':true,
+					'Dynamic Line':false
+				}},
+      toolbox: {
+        show: true,
+        feature: {
+          dataView: { readOnly: false },
+          restore: {},
+          saveAsImage: {}
+        }
+      },
+      dataZoom: {
+        show: false,
+        start: 0,
+        end: 100
+      },
+      xAxis: [
+        {
+          type: 'category',
+          boundaryGap: false,
+          data: categories,
+          show: true,
+        },
+        {
+          type: 'category',
+          boundaryGap: true,
+          data: categories2,
+          show: true,
+        }
+      ],
+      yAxis: [
+        {
+          type: 'value',
+          scale: true,
+          name: 'Price',
+          max: 30,
+          min: 0,
+          boundaryGap: [0.2, 0.2]
+        },
+        {
+          type: 'value',
+          scale: true,
+          name: 'Order',
+          max: 1200,
+          min: 0,
+          boundaryGap: [0.2, 0.2]
+        }
+      ],
+      series: [
+        {
+          name: 'Dynamic Bar',
+          type: 'line',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          data: data,
+          show: false,
+        },
+        {
+          name: 'Dynamic Line',
+          type: 'line',
+          data: data2,
+          show: false,
+        }
+      ]
+    };
+    app.count = 11;
+    setInterval(function () {
+      let axisData = new Date().toLocaleTimeString().replace(/^\D*/, '');
+      data.shift();
+      data.push(Math.round(Math.random() * 1000));//柱子数值
+      data2.shift();
+      data2.push(+(Math.random() * 10 + 5).toFixed(1));//折线数值
+      categories.shift();
+      categories.push(axisData);//x轴 时间
+      categories2.shift();
+      categories2.push(app.count++);//x轴  
+      myChart.setOption({
+        xAxis: [
+          {
+            data: categories
+          },
+          {
+            data: categories2
+          }
+        ],
+        series: [
+          {
+            data: data
+          },
+          {
+            data: data2
+          }
+        ]
+      });
+    }, 1000*1);
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+</body>
+
+</html>

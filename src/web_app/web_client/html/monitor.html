@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>网页点云显示测试</title>
+    <meta charset="utf-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=2">
+    <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+    <meta HTTP-EQUIV="Expires" CONTENT="0">
+
+    <script src='../js/jquery.min.js'></script>
+    <script src='../js/webtalk.js'></script>
+
+    <script type="text/javascript"
+        src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script src="../js/pointcloud.js"></script>
+    <script src="../three.js/build/three.js"></script>
+    <script src="../js/params_table.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href="../css/params_table.css" rel="stylesheet" type="text/css">
+    <style>
+        body {
+            height: 100%;
+            background-color: #fff;
+            color: #444;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -9;
+            display: block;
+        }
+
+        span {
+            margin-left: 15px;
+        }
+    </style>
+
+    <script type="module">
+
+        import * as THREE from '../three.js/build/three.module.js';
+
+        import Stats from '../three.js/examples/jsm/libs/stats.module.js';
+        import { PCDLoader } from '../three.js/examples/jsm/loaders/PCDLoader.js';
+        import { TrackballControls } from '../three.js/examples/jsm/controls/TrackballControls.js';
+        import { FirstPersonControls } from '../three.js/examples/jsm/controls/FirstPersonControls.js';
+
+
+        import {
+            BufferGeometry,
+            Float32BufferAttribute,
+            Points,
+            PointsMaterial
+        } from '../three.js/build/three.module.js';
+
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////rslidar_mid_scan
+        const geometry_mid_scan = new BufferGeometry();
+        //input_pointTcanvas_mid_scan(window.JSON.parse(value));
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	var cnt_event = 0;
+	var flag_non = 0 ;
+
+	var cnt_test2= 0;
+	var cnt_yy = 0;
+
+        var timer = setInterval(function () {
+
+	    cnt_yy = cnt_yy +50;
+	
+            if (flag_test == 1   ) {
+                flag_test = 0;
+		//console.log("===================");
+		//console.log(receive_lidar_data);
+                input_pointTcanvas_mid_scan(receive_lidar_data);
+                //console.log(receive_lidar_data);
+                cnt_test2++;
+            }
+            
+            if( cnt_yy == 1000 )
+            {
+            	//console.log(cnt_test2);
+            	cnt_yy = 0;
+            	cnt_test2 = 0;
+            	
+            	//document.body.style.zoom = 0.5;
+            }
+            
+            if( table_send_flag ==true )
+            {
+            	ws.send(jsonText_final);
+            	//console.log("pppppppppppppppppppppppp");
+            	table_send_flag = false;
+            }
+            
+            
+        }, 50)
+
+
+
+        // Subscribing to a Topic
+
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+
+////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////
+
+/*
+
+释放webGL占用内存
+
+write by wuweiwei
+
+*/
+
+var releaseRender = function(renderer, scene)
+{
+
+    scene.traverse((child) => {
+      if (child.material) {
+        child.material.dispose();
+      }
+      if (child.geometry) {
+        child.geometry.dispose();
+      }
+      child = null;
+    });
+  
+
+  try
+
+  {
+
+    clearScene(scene);
+  }
+
+  catch (e)
+
+  {
+  }
+
+  try
+
+  {
+
+    renderer.renderLists.dispose();
+
+    renderer.dispose();
+
+    //renderer.forceContextLoss();
+
+    renderer.domElement = null;
+
+    renderer.content = null;
+
+    renderer = null;
+  }
+
+  catch (e)
+
+  {
+  }
+
+  if (!!window.requestAnimationId)
+
+  {
+
+    cancelAnimationFrame(window.requestAnimationId);
+  }
+
+  THREE.Cache.clear();
+}
+
+
+/////////////////////////////////////////////////////
+
+var group = new THREE.Group();
+var flag_init = 0 ;
+
+        //放入点rs_mid_scan
+        function input_pointTcanvas_mid_scan(point_array) {
+            position_mid_scan.length = 0;
+            for (var i = 0; i < point_array.length; i = i+3) {
+                if (point_array[i] == null) {
+                    continue;
+                }
+                position_mid_scan.push(point_array[i]);
+                position_mid_scan.push(point_array[i+1]);
+                position_mid_scan.push(point_array[i+2]);
+            }
+            //console.log("the mark is " + point_array[0].z.toFixed(3));
+	    releaseRender(renderer, scene);
+            geometry_mid_scan.setAttribute('position', new Float32BufferAttribute(position_mid_scan, 3));
+            
+            
+            //////////////////////////////////////////////////////////////////////
+            
+            if(flag_init == 1)
+            {
+            	return;
+            }
+            flag_init = 1;
+            
+            /////////////////////////////////////////////////////////////////////////
+            
+            
+            //geometry_rs.setAttribute( 'normal', new Float32BufferAttribute( normal_rs, 3 ) );
+            geometry_mid_scan.computeBoundingSphere();
+
+            const material_mid_scan = new PointsMaterial({ size: 0.2 });
+            material_mid_scan.color.setHex(0xFF0000);
+
+            // var mesh_rs = new THREE.Mesh( geometry_rs, material_rs );
+            //console.log(point_array);
+            var mesh_mid_scan;
+            mesh_mid_scan = new Points(geometry_mid_scan, material_mid_scan);
+
+
+	    group.add(mesh_mid_scan);
+	    scene.add(group);
+
+
+        }
+
+
+
+        container = document.getElementById('container1');
+
+        camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 1, 10000);
+
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+
+        var geometry = new THREE.BoxGeometry(1.8, 0.8, 1.5);
+        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+        material.transparent = true;//是否透明
+        material.opacity = 0.5;//透明度
+        var cube = new THREE.Mesh(geometry, material);
+        cube.position.x = 0;
+        cube.position.y = 0;
+        cube.position.z = 10;
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+
+
+        //鼠标事件
+        var controls = new TrackballControls(camera, renderer.domElement);                                //轨迹球控件，最常用的控件，可以使用鼠标轻松的移动、平移，缩放场景。
+
+        controls.rotateSpeed = 10;                                                                        //鼠标控制速度
+        controls.zoomSpeed = 1;                                                                           //鼠标控制速度
+        controls.panSpeed = 1;                                                                            //鼠标控制速度
+
+        controls.staticMoving = true;                                                                     // 静止移动，为 true 则没有惯性
+
+        controls.minDistance = 3;
+        controls.maxDistance = 0.3 * 10000;
+
+
+
+        animate();
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+
+            cube.position.x = pose_x;
+            cube.position.y = pose_y;
+            cube.position.z = pose_z;
+            cube.rotation.z = yaw;
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            controls.update();
+            //stats.update();
+            renderer.render(scene, camera);
+
+        }
+
+        camera.position.set(0, 100, 0);
+        camera.up.set(0, 0, 1);
+        camera.lookAt(0, 0, 0);
+        lock1 = 0;
+
+
+    </script>
+
+</head>
+
+<body>
+
+
+    <script>
+
+    </script>
+
+    <div class="header">
+        <font size="30"><b>镭 神 智 能</b></font>
+    </div>
+
+    <div class="main" style="width:35%;">
+        <button id="btn_1"> 参 数 配 置</button>
+        <div class="form_1">
+            <div class="input_1">
+                <div class="login_logo3">参 数 配 置</div>
+                <div class="close">X</div>
+            </div>
+            <hr>
+            <div class="login_logo2">基 本 参 数</div><br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>雷达ip:</textarea>
+                    <p5>　　</p5><input type="text" id="lidar_ip" value="null" placeholder="&nbsp;null;"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>雷达数据端口:</textarea>
+                            <p5>　　</p5><input type="text" id="lidar_data_port" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>雷达设备端口:</textarea>
+                            <p5>　　</p5><input type="text" id="lidar_device_port" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>目标雷达ip:</textarea>
+                    <p5>　　</p5><input type="text" id="result_ip" value="null" placeholder="&nbsp;null;"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>目标雷达数据端口:</textarea>
+                            <p5>　　</p5><input type="text" id="result_port" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>摄像头数据地址:</textarea>
+                            <p5>　　</p5><input type="text" id="video_url" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>调试模式:</textarea>
+                    <p5>　　</p5><input type="text" id="debug" value="null" placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>日志模式:</textarea>
+                            <p5>　　</p5><input type="text" id="log_flag" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>滤波模式:</textarea>
+                            <p5>　　</p5><input type="text" id="filter_flag" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div class="login_logo2">滤 波 参 数</div><br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>x轴最小值:</textarea>
+                    <p5>　　</p5><input type="text" id="filter_x_min" value="null" placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>x轴最大值:</textarea>
+                            <p5>　　</p5><input type="text" id="filter_x_max" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>y轴最小值:</textarea>
+                            <p5>　　</p5><input type="text" id="filter_y_min" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>y轴最大值:</textarea>
+                    <p5>　　</p5><input type="text" id="filter_y_max" value="null" placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>z轴最小值:</textarea>
+                            <p5>　　</p5><input type="text" id="filter_z_min" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>z轴最大值:</textarea>
+                            <p5>　　</p5><input type="text" id="filter_z_max" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div class="login_logo2"> 其 他 </div><br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>yaw:</textarea>
+                    <p5>　　</p5><input type="text" id="yaw" value="null" placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>pitch:</textarea>
+                            <p5>　　</p5><input type="pitch" id="pitch" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>roll:</textarea>
+                            <p5>　　</p5><input type="roll" id="roll" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>x_offset:</textarea>
+                    <p5>　　</p5><input type="text" id="x_offset" value="null" placeholder="&nbsp;null">
+                </span>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>y_offset:</textarea>
+                    <p5>　　</p5><input type="text" id="y_offset" value="null" placeholder="&nbsp;null">
+                </span>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>z_offset:</textarea>
+                    <p5>　　</p5><input type="text" id="z_offset" value="null" placeholder="&nbsp;null">
+                </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>calculate_calibration_param:</textarea>
+                    <p5>　　</p5><input type="text" id="calculate_calibration_param" value="null"
+                        placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>save_pcd:</textarea>
+                            <p5>　　</p5><input type="text" id="save_pcd" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>pcd_path:</textarea>
+                            <p5>　　</p5><input type="text" id="pcd_path" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>points_txt_path:</textarea>
+                    <p5>　　</p5><input type="text" id="points_txt_path" value="null" placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>mosaic_image_height:</textarea>
+                            <p5>　　</p5><input type="text" id="mosaic_image_height" value="null"
+                                placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>mosaic_image_width:</textarea>
+                            <p5>　　</p5><input type="text" id="mosaic_image_width" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>pixel_grid_size:</textarea>
+                    <p5>　　</p5><input type="text" id="pixel_grid_size" value="null" placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>pixel_x_min:</textarea>
+                            <p5>　　</p5><input type="text" id="pixel_x_min" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>pixel_x_max:</textarea>
+                            <p5>　　</p5><input type="text" id="pixel_x_max" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>pixel_y_min:</textarea>
+                    <p5>　　</p5><input type="text" id="pixel_y_min" value="null" placeholder="&nbsp;null"><span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>pixel_y_max:</textarea>
+                            <p5>　　</p5><input type="text" id="pixel_y_max" value="null" placeholder="&nbsp;null">
+                        </span>
+                        <span class="input_1"><textarea cols="15" rows="1" disabled>move_origin:</textarea>
+                            <p5>　　</p5><input type="text" id="move_origin" value="null" placeholder="&nbsp;null">
+                        </span>
+            </div>
+            <br />
+            <div>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>transform_flag:</textarea>
+                    <p5>　　</p5><input type="text" id="transform_flag" value="null" placeholder="&nbsp;null">
+                </span>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>:</textarea>
+                    <p5>　　</p5><input type="text" id="null1" value="null" placeholder="&nbsp;null">
+                </span>
+                <span class="input_1"><textarea cols="15" rows="1" disabled>:</textarea>
+                    <p5>　　</p5><input type="text" id="null2" value="null" placeholder="&nbsp;null">
+                </span>
+                <div class="input_1"><button id="comfirm_save_params" class="submit_1">&nbsp; 保 存 &nbsp;</button></div>
+            </div>
+            <br>
+
+        </div>
+    </div>
+
+    <div id="container1">
+    </div>
+
+    <div class="nav" style="width:63%;">
+        <!-- Copyright ? W3Schools.com
+        Copyright ? W3Schools.com
+        Copyright ? W3Schools.com
+        Copyright ? W3Schools.comCopyright ? W3Schools.comCopyright ? W3Schools.comCopyright ? W3Schools.com -->
+    </div>
+
+    <div class="section" style="width:35%;height: 800px;">
+        <img id="tus">
+    </div>
+
+    <div class="nav" style="width:63%;">
+        <!-- Copyright ? W3Schools.com
+        Copyright ? W3Schools.com
+        Copyright ? W3Schools.com
+        Copyright ? W3Schools.comCopyright ? W3Schools.comCopyright ? W3Schools.comCopyright ? W3Schools.com -->
+    </div>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,34 @@
+/* ////////////////////////// */
+.header {
+    background-color:rgba(75, 75, 81, 0.563);
+    color:rgb(108, 159, 220);
+    text-align:center;
+	position: relative;
+	top: auto;
+    padding:2px;
+}
+.nav {
+    line-height:30px;
+    /* background-color:#eeeeee; */
+    float:left;
+    padding:5px;	      
+}
+.section {
+    float:left;
+	background-color:#54626f;
+    padding:10px;	 	 
+}
+.footer {
+	float:bottom;
+    background-color:black;
+    color:white;
+    clear:both;
+    text-align:center;
+   padding:5px;	 	 
+}
+.hs {
+	font-size: 50px;
+}
+div{
+	line-height: 25px;
+}

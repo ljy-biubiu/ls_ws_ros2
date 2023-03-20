@@ -1,0 +1,77 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/btn_close.png</file>
+        <file>images/btn_ok.png</file>
+        <file>images/msg_error.png</file>
+        <file>images/msg_info.png</file>
+        <file>images/msg_question.png</file>
+        <file>images/qt_zh_CN.qm</file>
+        <file>images/widgets.qm</file>
+        <file>images/dy.png</file>
+        <file>images/sjqyxd.png</file>
+        <file>images/bcjd.png</file>
+        <file>images/计算器_calculator-one (1).png</file>
+        <file>images/计算器_calculator-one.png</file>
+        <file>images/zuoshi.png</file>
+        <file>images/zhengshi.png</file>
+        <file>images/writing_pressed.png</file>
+        <file>images/writing_normal.png</file>
+        <file>images/video.png</file>
+        <file>images/up.png</file>
+        <file>images/trick.png</file>
+        <file>images/title.png</file>
+        <file>images/sms.png</file>
+        <file>images/setting_pressed.png</file>
+        <file>images/setting_normal.png</file>
+        <file>images/setInitcoor.png</file>
+        <file>images/select.png</file>
+        <file>images/saveas.ico</file>
+        <file>images/save.png</file>
+        <file>images/save.ico</file>
+        <file>images/reduce_press.png</file>
+        <file>images/reduce.png</file>
+        <file>images/pointcolor.png</file>
+        <file>images/open.png</file>
+        <file>images/ON.png</file>
+        <file>images/OFF.png</file>
+        <file>images/normal_normal.png</file>
+        <file>images/normal_hover.png</file>
+        <file>images/new.ico</file>
+        <file>images/min_normal.png</file>
+        <file>images/min_hover.png</file>
+        <file>images/max_normal.png</file>
+        <file>images/max_hover.png</file>
+        <file>images/main.ico</file>
+        <file>images/LSlogo1.png</file>
+        <file>images/Logo.png</file>
+        <file>images/logo2.png</file>
+        <file>images/leishen.ico</file>
+        <file>images/led_on.png</file>
+        <file>images/led_off.png</file>
+        <file>images/help.png</file>
+        <file>images/Grid.png</file>
+        <file>images/fushi.png</file>
+        <file>images/Font Awesome Cheatsheet.png</file>
+        <file>images/Font</file>
+        <file>images/down.png</file>
+        <file>images/Coordinate.png</file>
+        <file>images/cloud.png</file>
+        <file>images/close_normal.png</file>
+        <file>images/close_hover.png</file>
+        <file>images/closedata.png</file>
+        <file>images/close.ico</file>
+        <file>images/clear.png</file>
+        <file>images/Button Refresh.png</file>
+        <file>images/background.png</file>
+        <file>images/angle.png</file>
+        <file>images/add_top.png</file>
+        <file>images/add_right.png</file>
+        <file>images/add_press.png</file>
+        <file>images/add_left.png</file>
+        <file>images/add_bottom.png</file>
+        <file>images/add.png</file>
+        <file>images/about_normal.png</file>
+        <file>images/about_hover.png</file>
+        <file>images/logo.jpg</file>
+    </qresource>
+</RCC>
