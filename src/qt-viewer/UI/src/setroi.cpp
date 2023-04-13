@@ -29,8 +29,8 @@ SetROI::SetROI(QWidget *parent) :
     {
         area[i].id =i;
         area[i].Obstacle_times =1;
-        area[i].Area_height_down=0;
-        area[i].Area_height_top =0;
+        area[i].Area_height_down=10;
+        area[i].Area_height_top =20;
 
         area[i].Area2D_point_T.clear();
         area[i].Area2D_point.clear();
@@ -69,15 +69,15 @@ void  SetROI::showPoint()
         row.itemy.setText(text2);
 
         list_tableItem << row;
-        ui->tableWidget_2->setItem(i, 0, &list_tableItem[i].itemx); 
+        ui->tableWidget_2->setItem(i, 0, &list_tableItem[i].itemx);
         ui->tableWidget_2->setItem(i, 1, &list_tableItem[i].itemy);
 
     }
     changindex = false;
 
-    ui->lineEdit_times->setText(QString("%1").arg(area[area_index].Obstacle_times));
-    ui->lineEdit_Area_height_max->setText(QString("%1").arg(area[area_index].Area_height_top));
-    ui->lineEdit_Area_height_min->setText(QString("%1").arg(area[area_index].Area_height_down));
+//    ui->lineEdit_times->setText(QString("%1").arg(area[area_index].Obstacle_times));
+//    ui->lineEdit_max_Z->setText(QString("%1").arg(area[area_index].Area_height_top));
+//    ui->lineEdit_min_Z->setText(QString("%1").arg(area[area_index].Area_height_down));
 
 }
 
@@ -124,38 +124,42 @@ void SetROI:: on_comboBox_activated(int index)
 
     emit sigChangeArea_index(index);
 
+
+
     area[area_index].Obstacle_times = ui->lineEdit_times->text().toFloat();
-    area[area_index].Area_height_top = ui->lineEdit_Area_height_max->text().toFloat();
-    area[area_index].Area_height_down =ui->lineEdit_Area_height_min->text().toFloat();
+    area[area_index].Area_height_top = ui->lineEdit_max_Z->text().toFloat();
+    area[area_index].Area_height_down =ui->lineEdit_min_Z->text().toFloat();
+
+    //qDebug()<<"high:"<<ui->lineEdit_max_Z->text().toFloat();
 
     emit sigaltablepaint();
 
 }
 
-void SetROI::on_lineEdit_times_textChanged(const QString &arg1)
-{
-    area[area_index].Obstacle_times = arg1.toFloat();
-    emit sigaltablepaint();
+//void SetROI::on_lineEdit_times_textChanged(const QString &arg1)
+//{
+//    area[area_index].Obstacle_times = arg1.toFloat();
+//}
 
-}
+//void SetROI::on_lineEdit_max_Z_textChanged(const QString &arg1)
+//{
+//    qDebug()<<"lineEdit_max_Z :"<<arg1.toFloat();
+//    area[area_index].Area_height_top = arg1.toFloat();
 
-void SetROI::on_lineEdit_Area_height_max_textChanged(const QString &arg1)
-{
-    area[area_index].Area_height_top = arg1.toFloat();
-    emit sigaltablepaint();
+//}
 
-}
-
-void SetROI::on_lineEdit_Area_height_min_textChanged(const QString &arg1)
-{
-    area[area_index].Area_height_down = arg1.toFloat();
-    emit sigaltablepaint();
-}
+//void SetROI::on_lineEdit_min_Z_textChanged(const QString &arg1)
+//{
+//    qDebug()<<"lineEdit_min_Z :"<<arg1.toFloat();
+//    area[area_index].Area_height_down = arg1.toFloat();
+//}
 
 //void SetROI::on_lineEdit_editingFinished(const QString &arg1)
 //{
 //    emit sigalareasize();
 //}
+
+
 
 void SetROI::on_lineEdit_textChanged(const QString &arg1)
 {
@@ -164,5 +168,13 @@ void SetROI::on_lineEdit_textChanged(const QString &arg1)
 
 void SetROI::on_pushButton_comfire_clicked()
 {
-    emit sigSaveAreaData();
+
+    area[area_index].Area_height_top = ui->lineEdit_max_Z->text().toFloat();
+    area[area_index].Area_height_down = ui->lineEdit_min_Z->text().toFloat();
+
+    qDebug()<<"lineEdit_max_Z :"<<area[area_index].Area_height_top;
+    qDebug()<<"lineEdit_min_Z :"<<area[area_index].Area_height_down;
+
+    emit sigalreflushpaint();
+    emit sigToPaintSaveAreaData();
 }

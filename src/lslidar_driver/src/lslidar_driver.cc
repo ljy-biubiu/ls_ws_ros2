@@ -403,8 +403,8 @@ void LslidarDriver::pubScanThread()
                 VPoint point;
                 int point_idx = round(degree * count_num / 360);
                 point.timestamp = timestamp - point_idx*(scan_time/count_num);
-                point.x = points[i].range*cos(M_PI/180*points[i].degree);
-                point.y = -points[i].range*sin(M_PI/180*points[i].degree);
+                point.y = points[i].range*cos(M_PI/180*points[i].degree);
+                point.x = points[i].range*sin(M_PI/180*points[i].degree);
                 point.z = 0;
                 point.intensity = points[i].intensity;
                 point_cloud->points.push_back(point);

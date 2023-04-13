@@ -50,6 +50,7 @@ typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
 
 Q_DECLARE_METATYPE(PointCloudTPtr)             //要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
+//Q_DECLARE_METATYPE(QVector<QVector<QLineEdit*>>)
 
 
 QT_BEGIN_NAMESPACE
@@ -86,6 +87,7 @@ private:
     //    EchartWindow *echartWindow;
     Diary *diary;
     Alarm *alarm;
+    Alarm *electric_alarm;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 
 private:
@@ -146,21 +148,25 @@ private:
     QAction *lidar_area_set;
     QSplashScreen *screen;
 
+    TaskListUi* task_list_ui;
+
 private slots:
     void view_mode_Action();
     void view_mode1_Action();
     void view_mode2_Action();
     void param_set_Action();
     void lidar_area_set_Action();
-    void getAreaDatas();
     void updateTopicParams(QString);
     void params_set(QString);
     void receive_lidar_driver(PointCloudTPtr);
+    void receive_lidar_dif(PointCloudTPtr msg);
     // void show_log(QString);
+    void sendAreaDatasToRos();
     
 
 signals:
     void emitTopicSetParams(QString);
     void uploadLog(QMultiMap<QString, QString>);
+    void sigSaveAreaData(Area);
 };
 #endif // MAINWINDOW_H

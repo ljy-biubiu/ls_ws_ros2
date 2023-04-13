@@ -10,6 +10,7 @@
 #include <QSqlQueryModel>
 #include "my_Util.h"
 
+
 #include <mutex>
 
 const int log_size = 100;
@@ -60,9 +61,6 @@ private:
 
 private slots:
    void show_log(QString);
-    
-
-
 };
 
 #endif // DIARY_H

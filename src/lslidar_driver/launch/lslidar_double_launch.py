@@ -33,6 +33,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_1',
                                 parameters=[driver_dir_1],
+                                respawn=True
                                 )
 
     driver_node_2 = LifecycleNode(package='lslidar_driver',
@@ -42,6 +43,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_2',
                                 parameters=[driver_dir_2],
+                                respawn=True
                                 )
 
 
@@ -52,6 +54,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_3',
                                 parameters=[driver_dir_3],
+                                respawn=True
                                 )
 
     driver_node_4 = LifecycleNode(package='lslidar_driver',
@@ -61,6 +64,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_4',
                                 parameters=[driver_dir_4],
+                                respawn=True
                                 )
 
     driver_node_5 = LifecycleNode(package='lslidar_driver',
@@ -70,6 +74,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_5',
                                 parameters=[driver_dir_5],
+                                respawn=True
                                 )
 
     driver_node_6 = LifecycleNode(package='lslidar_driver',
@@ -79,6 +84,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_6',
                                 parameters=[driver_dir_6],
+                                respawn=True
                                 )    
 
     driver_node_7 = LifecycleNode(package='lslidar_driver',
@@ -88,6 +94,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_7',
                                 parameters=[driver_dir_7],
+                                respawn=True
                                 )
 
     driver_node_8 = LifecycleNode(package='lslidar_driver',
@@ -97,6 +104,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_8',
                                 parameters=[driver_dir_8],
+                                respawn=True
                                 )  
 
     driver_node_9 = LifecycleNode(package='lslidar_driver',
@@ -106,6 +114,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_9',
                                 parameters=[driver_dir_9],
+                                respawn=True
                                 )
 
     driver_node_10 = LifecycleNode(package='lslidar_driver',
@@ -115,6 +124,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_10',
                                 parameters=[driver_dir_10],
+                                respawn=True
                                 )                     
 
     driver_node_11 = LifecycleNode(package='lslidar_driver',
@@ -124,6 +134,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_11',
                                 parameters=[driver_dir_11],
+                                respawn=True
                                 )     
 
     driver_node_12 = LifecycleNode(package='lslidar_driver',
@@ -133,6 +144,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_12',
                                 parameters=[driver_dir_12],
+                                respawn=True
                                 )                     
 
     driver_node_13 = LifecycleNode(package='lslidar_driver',
@@ -142,6 +154,7 @@ def generate_launch_description():
                                 emulate_tty=True,
                                 namespace='lidar_13',
                                 parameters=[driver_dir_13],
+                                respawn=True
                                 )     
 
     driver_node_14 = LifecycleNode(package='lslidar_driver',
@@ -151,6 +164,7 @@ def generate_launch_description():
                             emulate_tty=True,
                             namespace='lidar_14',
                             parameters=[driver_dir_14],
+            		     respawn=True
                             )     
                                 
 
@@ -179,6 +193,6 @@ def generate_launch_description():
         driver_node_12,
         driver_node_13,
         driver_node_14,
-        rviz_node,
+        # rviz_node,
     ])
 

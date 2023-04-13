@@ -17,10 +17,6 @@ void Maindeal::initRos()
 
 void Maindeal::initUI()
 {
-    // app = new QApplication(this->my_argc, this->my_argv);
-    // dw = new QDesktopWidget();
-    // w = new MainWindow(qApp);
-    // this->w->showMaximized();
     
     //解决汉字乱码问题
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
@@ -32,6 +28,7 @@ void Maindeal::initUI()
     usleep(1000 * 1000 * 2);
     this->mainwindow->getqSplashScreen()->close(); // 关闭启动动画
     mainwindow->showMaximized();
+
 }
 
 const std::shared_ptr<QApplication> Maindeal::getApp()

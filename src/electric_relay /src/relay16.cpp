@@ -26,15 +26,155 @@ WEB密  码：123456
 #define DBUG_MODE 0
 #define TESTFUN 1
 #define CHECK_MAX_NUM 5
+#define RING_TIME 5
+
+//--------------------------------------
+using std::placeholders::_1;
+using namespace std::chrono_literals;
+//-----------------------------------------
+
+int anyGpioControl(unsigned char pin, bool pinState ,bool clear_state);
+int sendCmdToRelay(const unsigned char *buff);
+unsigned char sendbuff[10]={0};
+
+int main(int argc, char **argv)
+{
+
+	//*******************************init*********************************//
+	for (int i = 0; i < 16; i++)
+	{
+		electric_relay_flags.push_back(0);
+	}
+
+	//*******************************创建继电器工作线程*********************************//
+	if (pthread_create(&main_thread_id, 0, dowork, (void *)&tcp_client_data) != 0) // 1.
+	{
+		std::cout << "Error creating electric_relay" << std::endl;
+	}
+	//************************************ros****************************************//
+	setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
+	rclcpp::init(argc, argv);
+	node = rclcpp::Node::make_shared("electric_relay_node");
+	RCLCPP_INFO(node->get_logger(), " electric_relay_node initialized ");
+
+	std::string device_ip_;
+	int device_port_;
+	node->declare_parameter<std::string>("device_ip", "10.60.28.241");
+	node->get_parameter("device_ip", device_ip_);
+
+	node->declare_parameter<int>("device_port", 50000);
+	node->get_parameter("device_port", device_port_);
+
+	timer_ =
+		node->create_wall_timer(100ms, timerCallback);
+
+	// std::cout << device_port_ << std::endl;
+	// std::cout << device_ip_ << std::endl;
+
+	auto parameter_server_pub_ =
+		node->create_publisher<std_msgs::msg::String>("/params_config/parameter_server", rclcpp::QoS{1}.transient_local());
+
+	auto parameter_server_sub = node->create_subscription<std_msgs::msg::String>(
+		"/params_config/parameter_server",
+		rclcpp::QoS{1}.transient_local(),
+		[node](const std_msgs::msg::String::SharedPtr msg)
+		{ parameterServerCallback(msg); });
+
+	auto electric_relay_control_sub = node->create_subscription<std_msgs::msg::Int8MultiArray>(
+		"/electric_relay/electric_relay_control",
+		rclcpp::QoS{1},
+		[node](const std_msgs::msg::Int8MultiArray::SharedPtr msg)
+		{ electric_relay_callback(msg); });
+
+	rclcpp::spin(node);
+	rclcpp::shutdown();
+	//************************************ros****************************************//
+
+	return 0;
+}
 
 void parameterServerCallback(const std_msgs::msg::String::SharedPtr msg)
 {
-	
 }
 
-void electric_relay_callback(const std_msgs::msg::Int32::SharedPtr msg)
+void timerCallback()
 {
-		std::cout<<"----------"<<std::endl;
+	for (int i = 0; i < electric_relay_flags.size(); i++)
+	{
+		if (electric_relay_flags[i] != 0)
+		{
+			electric_relay_flags[i] = electric_relay_flags[i] + 1;
+		}
+
+		if (electric_relay_flags[i] > RING_TIME * 10)
+		{
+			electric_relay_flags[i] = 0;
+		}
+	}
+}
+
+void electric_relay_callback(const std_msgs::msg::Int8MultiArray::SharedPtr msg)
+{
+	std::cout << "----------" << std::endl;
+
+	int rak{0};
+	int control_result{0};
+	std_msgs::msg::Int8MultiArray msg_change;
+	for(int i{0} ; 16>i ; i++)
+	{
+		msg_change.data.push_back(0);
+	}
+	
+
+
+	for (auto cmd : msg->data)
+	{
+		// usleep(5 * 1000);
+		if (cmd == 1) // 报警
+		{
+			electric_relay_flags[rak] = 1; // 设置为1，开始计时，直至将该值置为0
+		}
+
+		if (electric_relay_flags[rak] != 0)
+		{
+			//control_result = control_result + securityRelayAlarmSingnalAPI(rak, 1);
+			msg_change.data[rak] = 1;
+		}
+		else
+		{
+			//control_result = control_result + securityRelayAlarmSingnalAPI(rak, cmd);
+			msg_change.data[rak] = 0;
+		}
+		rak++;
+	}
+	
+	
+	//short int control_alarm_sum{0};
+	
+	//for(auto dat : msg_change.data)
+	//{
+	//	control_alarm_sum = control_alarm_sum | dat;
+	//	control_alarm_sum<<1;
+	//}
+	
+	
+	
+	anyGpioControl( 1 , msg_change.data[0] ,1);
+	std::cout<<"the 1 lidar is "<< msg_change.data[0]<<std::endl;
+	for(int i{2};i<=msg_change.data.size();i++)
+	{
+		anyGpioControl(i, msg_change.data[i-1] ,0);
+		std::cout<<"the "<<std::to_string(i) << " lidar is "<< std::to_string(msg_change.data[i-1])<<std::endl;
+	}
+	sendCmdToRelay(sendbuff);
+	
+	
+
+	if (control_result != 0)
+	{
+		//RCLCPP_ERROR_STREAM(node->get_logger(), "control_result vuale :" + std::to_string(control_result) + ", control electric_relay fail!!!!");
+	}
+	std::cout << "----------2222" << std::endl;
 }
 
 void *dowork(void *)
@@ -48,7 +188,7 @@ void *dowork(void *)
 	struct sockaddr_in tcp_server; // 地址结构体
 
 	/*此处调用设置IP和端口的API*/
-	SetTcpServerConfigAPI("192.168.2.180", 50000);
+	SetTcpServerConfigAPI("10.60.28.240", 8234);
 
 	/*1. 创建网络套接字*/
 	tcp_server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -71,7 +211,9 @@ void *dowork(void *)
 	if (bind(tcp_server_fd, (const struct sockaddr *)&tcp_server, sizeof(struct sockaddr)) < 0)
 	{
 		printf("TCP服务器端口绑定失败!\n");
-		exit(1);
+		// exit(1);
+		void *pv = nullptr;
+		return pv;
 	}
 	/*3. 设置监听的客户端数量*/
 	listen(tcp_server_fd, 100);
@@ -118,50 +260,80 @@ void *dowork(void *)
 	}
 }
 
-int main()
+
+
+
+/*
+
+举例子：一次控制1 2 3 13 号开启，15号关闭
+anyGpioControl(1,1,1);
+anyGpioControl(2,1,0);
+anyGpioControl(3,1,0);
+anyGpioControl(13,1,0);
+anyGpioControl(15,0,0);
+sendCmdToRelay(sendbuff);
+
+*/
+
+int anyGpioControl(unsigned char pin, bool pinState ,bool clear_state)
 {
-	//*******************************创建继电器工作线程*********************************//
-	if (pthread_create(&main_thread_id, 0, dowork, (void *)&tcp_client_data) != 0) // 1.
+	int i=0;
+	unsigned char temp=0;
+	if(clear_state)
 	{
-		std::cout << "Error creating electric_relay" << std::endl;
+		relayCmd.contrlBit=0x0000;
+		relayCmd.enablelBit=0xFFFF;
 	}
-
-	//************************************ros****************************************//
-	int argc = 0;
-	char **argv = NULL;
-	rclcpp::init(argc, argv);
-	auto node = rclcpp::Node::make_shared("electric_relay");
-
-	RCLCPP_INFO(node->get_logger(), " electric_relay_node initialized ");
-	auto parameter_server_pub_ =
-		node->create_publisher<std_msgs::msg::String>("/params_config/parameter_server", rclcpp::QoS{1}.transient_local());
-
-	auto parameter_server_sub = node->create_subscription<std_msgs::msg::String>(
-		"/params_config/parameter_server",
-		rclcpp::QoS{1}.transient_local(),
-		[node](const std_msgs::msg::String::SharedPtr msg)
-		{ parameterServerCallback(msg); });
-
-	auto electric_relay_control_sub = node->create_subscription<std_msgs::msg::Int32>(
-		"/electric_relay/electric_relay_control",
-		rclcpp::QoS{1}.transient_local(),
-		[node](const std_msgs::msg::Int32::SharedPtr msg)
-		{ electric_relay_callback(msg); });
-
-	RCLCPP_INFO(node->get_logger(), " electric_relay_node initialized ");
-
-	rclcpp::spin(node);
-	rclcpp::shutdown();
-	//************************************ros****************************************//
-
+	if(pinState)
+		relayCmd.contrlBit |=  (1<<(pin-1));
+	else
+		relayCmd.contrlBit &=  ~(1<<(pin-1));
+	relayCmd.enablelBit |= (1<<(pin-1));	
+	relayCmd.crcH=0;
+	for(i=2;i<=7;i++)
+	 relayCmd.crcH += *((unsigned char *)&relayCmd+i);
+	relayCmd.crcL=relayCmd.crcH*2;
+	memcpy(sendbuff,&relayCmd,10);
+	temp=sendbuff[4];
+	sendbuff[4]=sendbuff[5];
+	sendbuff[5]=temp;
+	temp=sendbuff[6];
+	sendbuff[6]=sendbuff[7];
+	sendbuff[7]=temp;
+	#if DBUG_MODE
+	for(i=0;i<sizeof(sendbuff);i++) printf("%.2X ",*(sendbuff+i));
+	printf("sendbuff_len=%d \n",sizeof(sendbuff));
+	#endif
 	return 0;
 }
+
+
+
+int sendCmdToRelay(const unsigned char *buff)
+{
+	int sendCmdNum=0;
+	tcp_client_data.ack=0;
+	sendCmdNum=0;
+	while(tcp_client_data.ack==0 && sendCmdNum <CHECK_MAX_NUM)
+	{
+		write(tcp_client_data.clientfd,buff,sizeof(buff));//发送命令
+		usleep(1000*50);
+		sendCmdNum++;
+	}
+	#if DBUG_MODE
+	printf("sendbuff_check_num=%d \n",sendCmdNum);
+	#endif
+	if(sendCmdNum == CHECK_MAX_NUM) return -1;
+	return 0;
+}
+
 
 /*
 红绿灯控制API接口函数
 参数
 	gpioNum: 选择GPIO口编号 1~16
 	gpioState:使能  1表示开启  0表示关闭
+	return 0 表示正常
 */
 int securityRelayAlarmSingnalAPI(int gpioNum, int gpioState)
 {
@@ -174,8 +346,8 @@ int securityRelayAlarmSingnalAPI(int gpioNum, int gpioState)
 		{
 			while (!tcp_client_data.ack && i < CHECK_MAX_NUM)
 			{
-				write(tcp_client_data.clientfd, gpio_16pin_on[gpioNum - 1], 10);
-				usleep(100 * 1000);
+				write(tcp_client_data.clientfd, gpio_16pin_on[gpioNum], 10);
+				usleep(50 * 1000);
 				i++;
 			}
 		}
@@ -183,8 +355,8 @@ int securityRelayAlarmSingnalAPI(int gpioNum, int gpioState)
 		{
 			while (!tcp_client_data.ack && i < CHECK_MAX_NUM)
 			{
-				write(tcp_client_data.clientfd, gpio_16pin_off[gpioNum - 1], 10);
-				usleep(100 * 1000);
+				write(tcp_client_data.clientfd, gpio_16pin_off[gpioNum], 10);
+				usleep(50 * 1000);
 				i++;
 			}
 		}

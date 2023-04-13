@@ -57,7 +57,7 @@ public:
     int                                 warning_type[3];
 
     int col =20;
-    float Radius = 100;
+    float Radius = 500;
     QPointF mousemovepoint;
 
 

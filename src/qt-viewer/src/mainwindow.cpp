@@ -37,8 +37,7 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     screen = new QSplashScreen(pixmap);
     screen->show();
 
-    // auto aaa = std::make_unique<TaskListUi>(this);
-    // aaa->show();
+    task_list_ui->show();
 }
 
 void MainWindow::initObeject()
@@ -51,6 +50,7 @@ void MainWindow::initObeject()
     main_title_bar = new MainTitleBar();
     paint_area = new PaintArea();
     setROI = new SetROI();
+    task_list_ui = new TaskListUi(this);
 
     paint_area->scroll = setROI->scrollarea;
     setROI->scrollarea->takeWidget();
@@ -58,6 +58,7 @@ void MainWindow::initObeject()
 
     diary = new Diary();
     alarm = new Alarm();
+    electric_alarm = new Alarm();
 
     camera_viewer = new CameraViewer();
     camera_viewer2 = new CameraViewer();
@@ -120,28 +121,57 @@ void MainWindow::updatePointCould()
     qvtkOpenglNativeWidget->update();
 }
 
-
-
-void MainWindow::receive_lidar_driver(PointCloudTPtr msg)
+void MainWindow::receive_lidar_dif(PointCloudTPtr msg)
 {
 
-    paint_area->xCloud->clear();
-    *paint_area->xCloud = *msg;
-    paint_area->update();
+    qDebug() << "receive_lidar_dif" << msg->size();
 
-    std::string name = "All_cloud";
+    std::string name = "lidar_dif_cloud";
+
+    this->viewer->setRepresentationToWireframeForAllActors();
 
     this->viewer->removePointCloud(name);
-    //pcl::visualization::PointCloudColorHandlerGenericField<PointT> single_color(msg, "z"); /// deep different color
+    // pcl::visualization::PointCloudColorHandlerGenericField<PointT> single_color(msg, "z"); /// deep different color
     viewer->addPointCloud(msg, name);
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, name);
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR,1,1,1, name);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, name);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1, 0, 0, name);
 
     // this->viewer->removePointCloud(name);
     // this->viewer->addPointCloud(msg, name);
     this->viewer->updatePointCloud(msg, name);
 
-    this->viewer->getRenderWindow()->GetInteractor()->Render();
+    // this->viewer->getRenderWindow()->GetInteractor()->Render();
+    this->viewer->getRenderWindow()->GetRenderers()->GetFirstRenderer()->Render();
+    this->viewer->getRenderWindow()->Render();
+    qvtkOpenglNativeWidget->update();
+}
+
+void MainWindow::receive_lidar_driver(PointCloudTPtr msg)
+{
+
+    qDebug() << "receive_lidar_driver" << msg->size();
+
+    // paint_area->xCloud->clear();
+    *paint_area->xCloud = *msg;
+    paint_area->update();
+
+    this->viewer->setRepresentationToWireframeForAllActors();
+
+    std::string name = "lidar_map_cloud";
+
+    this->viewer->removePointCloud(name);
+    // pcl::visualization::PointCloudColorHandlerGenericField<PointT> single_color(msg, "z"); /// deep different color
+    viewer->addPointCloud(msg, name);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, name);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1, 1, 1, name);
+
+    // this->viewer->removePointCloud(name);
+    // this->viewer->addPointCloud(msg, name);
+    this->viewer->updatePointCloud(msg, name);
+
+    this->viewer->getRenderWindow()->GetRenderers()->GetFirstRenderer()->Render();
+    this->viewer->getRenderWindow()->Render();
+    // this->viewer->getRenderWindow()->GetInteractor()->Render();
     qvtkOpenglNativeWidget->update();
 }
 // PointCloudTPtr
@@ -215,40 +245,40 @@ void MainWindow::mainLayOut()
 
     ///////////////////////////////////////////////////////////////////////////////
 
-    auto a = new QWidget();
-    auto b = new QWidget();
+    //    auto a = new QWidget();
+    //    auto b = new QWidget();
 
-    // 设置背景黑色
-    QPalette palBackGround(a->palette());
-    palBackGround.setColor(QPalette::Background, QColor(23, 23, 23));
-    a->setAutoFillBackground(true);
-    a->setPalette(palBackGround);
+    // // 设置背景黑色
+    // QPalette palBackGround(a->palette());
+    // palBackGround.setColor(QPalette::Background, QColor(23, 23, 23));
+    // a->setAutoFillBackground(true);
+    // a->setPalette(palBackGround);
 
-    // 设置背景黑色
-    QPalette palBackGround_b(b->palette());
-    palBackGround_b.setColor(QPalette::Background, QColor(23, 23, 23));
-    b->setAutoFillBackground(true);
-    b->setPalette(palBackGround_b);
+    // // 设置背景黑色
+    // QPalette palBackGround_b(b->palette());
+    // palBackGround_b.setColor(QPalette::Background, QColor(23, 23, 23));
+    // b->setAutoFillBackground(true);
+    // b->setPalette(palBackGround_b);
 
-    right_body_layout->setMargin(0);
-    right_camera_layout->setMargin(0);
-    right_body_layout->setSpacing(0);
-    right_camera_layout->setSpacing(0);
+    // right_body_layout->setMargin(0);
+    // right_camera_layout->setMargin(0);
+    // right_body_layout->setSpacing(0);
+    // right_camera_layout->setSpacing(0);
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    right_camera_layout->addWidget(a);
-    right_camera_layout->addWidget(camera_viewer);
-    right_camera_layout->addWidget(b);
+    // right_camera_layout->addWidget(a);
+    right_camera_layout->addWidget(electric_alarm);
+    // right_camera_layout->addWidget(b);
 
-    right_camera_layout->setStretchFactor(a, 1);
-    right_camera_layout->setStretchFactor(camera_viewer, 7);
-    right_camera_layout->setStretchFactor(b, 1);
+    // right_camera_layout->setStretchFactor(a, 1);
+    right_camera_layout->setStretchFactor(electric_alarm, 7);
+    // right_camera_layout->setStretchFactor(b, 1);
 
     right_data_layout->addWidget(diary);
-    right_data_layout->addWidget(alarm);
-    right_data_layout->setStretchFactor(diary, 7);
-    right_data_layout->setStretchFactor(alarm, 5);
+    //    right_data_layout->addWidget(alarm);
+    //    right_data_layout->setStretchFactor(diary, 7);
+    //    right_data_layout->setStretchFactor(alarm, 5);
 
     //    right_body_layout->addWidget(camera_viewer);
     right_body_layout->addLayout(right_camera_layout);
@@ -341,13 +371,26 @@ void MainWindow::initConnect()
     QObject::connect(add_lidar, SIGNAL(SendSet(QString)), this, SLOT(params_set(QString)));
     QObject::connect(setROI, SIGNAL(sigChangeArea_index(int)), paint_area, SLOT(UpdateArea_index(int)));
     QObject::connect(setROI, SIGNAL(sigSaveAreaData()), this, SLOT(getAreaDatas()));
-    QObject::connect(ros_talk, SIGNAL(emitTopicParams(QString)), this, SLOT(updateTopicParams(QString)));
+    QObject::connect(ros_talk, SIGNAL(emitTopicParams(QString)), task_list_ui, SLOT(updateTopicParams(QString)));
     QObject::connect(this, SIGNAL(emitTopicSetParams(QString)), ros_talk, SLOT(saveTopicParams(QString)));
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer2, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_lidar_drive(PointCloudTPtr)), this, SLOT(receive_lidar_driver(PointCloudTPtr)));
+    QObject::connect(ros_talk, SIGNAL(emit_lidar_dif(PointCloudTPtr)), this, SLOT(receive_lidar_dif(PointCloudTPtr)));
+
     // QObject::connect(this, SIGNAL(uploadLog(QMultiMap<QString, QString>)), this, SLOT(receive_lidar_driver(QMultiMap<QString, QString>)));
     QObject::connect(ros_talk, SIGNAL(emit_show_log(QString)), diary, SLOT(show_log(QString)));
+    QObject::connect(ros_talk, SIGNAL(emit_lidar_derect_result(QVector<int>)), alarm, SLOT(lidar_derect_result(QVector<int>)));
+
+    QObject::connect(setROI, SIGNAL(sigToPaintSaveAreaData()), this, SLOT(sendAreaDatasToRos()));
+    QObject::connect(this, SIGNAL(sigSaveAreaData(Area)), ros_talk, SLOT(getAreaDatas(Area)));
+    QObject::connect(this->task_list_ui, SIGNAL(sigSavePushButton(QVector<QVector<QLineEdit *>>)), ros_talk, SLOT(saveLidarDatas(QVector<QVector<QLineEdit *>>)));
+}
+
+void MainWindow::sendAreaDatasToRos()
+{
+    //    auto tmp = this->paint_area->area[0].Area2D_point_T;
+    sigSaveAreaData(this->paint_area->area[0]);
 }
 
 void MainWindow::createActions()
@@ -391,14 +434,27 @@ CameraViewer *MainWindow::getCameraWidget()
     return this->camera_viewer;
 }
 
-void MainWindow::getAreaDatas()
-{
-}
+// void MainWindow::getAreaDatas()
+//{
+//     QList<PointT> tmp;
+
+//    // 地面层
+//    auto tmp = this->paint_area->area[0].Area2D_point_T;
+
+//    std::cout << " this->paint_area->area[0].Area2D_point_T" << this->paint_area->area[0].Area2D_point_T.size() << std::endl;
+//    std::cout << " tmp.size()" << tmp.size() << std::endl;
+//    for (int j = 0; j < tmp.size(); j++)
+//    {
+//        std::cout<<"tmp[j].x:"<<tmp[j].x<< " tmp[j].y :"<< tmp[j].y<<std::endl;
+//        //cv::Point2d point2D(tmp[j].x, tmp[j].y);
+//        //params_event->getTotalParams().baseParams.roiArea.ground.push_back(point2D);
+//    }
+//}
 
 void MainWindow::updateTopicParams(QString msg)
 {
-    // qDebug() << "updateTopicParams:" << msg;
-    add_lidar->ShowData(msg);
+    //// qDebug() << "updateTopicParams:" << msg;
+    //    add_lidar->ShowData(msg);
 }
 
 void MainWindow::params_set(QString msg)
@@ -407,6 +463,61 @@ void MainWindow::params_set(QString msg)
     //   qDebug() << "updateTopicParams:" << msg;
     //   add_lidar->ShowData(msg);
 }
+
+// QList<PointT> tmp;
+
+//// 地面层
+// tmp = this->paint_area->area[0].Area2D_point_T;
+
+// std::cout << " this->paint_area->area[0].Area2D_point_T" << this->paint_area->area[0].Area2D_point_T.size() << std::endl;
+// std::cout << " tmp.size()" << tmp.size() << std::endl;
+// for (int j = 0; j < tmp.size(); j++)
+//{
+//     cv::Point2d point2D(tmp[j].x, tmp[j].y);
+//     params_event->getTotalParams().baseParams.roiArea.ground.push_back(point2D);
+// }
+
+//// 地面xx层
+// tmp.clear();
+// tmp = this->paint_area->area[1].Area2D_point_T;
+// for (int j = 0; j < tmp.size(); j++)
+//{
+//     cv::Point2d point2D(tmp[j].x, tmp[j].y);
+//     params_event->getTotalParams().baseParams.roiArea.rectangle_ground.push_back(point2D);
+// }
+
+//// 夹板层
+// tmp.clear();
+// tmp = this->paint_area->area[2].Area2D_point_T;
+// for (int j = 0; j < tmp.size(); j++)
+//{
+//     cv::Point2d point2D(tmp[j].x, tmp[j].y);
+//     params_event->getTotalParams().baseParams.roiArea.ship.push_back(point2D);
+// }
+
+// for (auto &msg : this->paint_area->area)
+//{
+//     msg.Area2D_point_T.clear();
+// }
+
+// for (auto msg : msg.baseParams.roiArea.ground)
+//{
+//     point.x = msg.x;
+//     point.y = msg.y;
+//     this->paint_area->area[0].Area2D_point_T.push_back(point);
+// }
+// for (auto msg : msg.baseParams.roiArea.rectangle_ground)
+//{
+//     point.x = msg.x;
+//     point.y = msg.y;
+//     this->paint_area->area[1].Area2D_point_T.push_back(point);
+// }
+// for (auto msg : msg.baseParams.roiArea.ship)
+//{
+//     point.x = msg.x;
+//     point.y = msg.y;
+//     this->paint_area->area[2].Area2D_point_T.push_back(point);
+// }
 
 // implement slot functions
 // void MainWindow::open()

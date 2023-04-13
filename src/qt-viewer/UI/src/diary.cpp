@@ -49,9 +49,9 @@ Diary::Diary(QWidget *parent) : QWidget(parent),
     // 隔行变色
     TableWidget->setAlternatingRowColors(true);
 
-    TableWidget->setColumnWidth(0, 90);
-    TableWidget->setColumnWidth(1, 50);
-    TableWidget->setColumnWidth(2, 220);
+    TableWidget->setColumnWidth(0, 180);
+    TableWidget->setColumnWidth(1, 100);
+    TableWidget->setColumnWidth(2, 400);
 
     table_widget_item_date = new QTableWidgetItem();
     table_widget_item_level = new QTableWidgetItem();
@@ -129,6 +129,7 @@ Diary::Diary(QWidget *parent) : QWidget(parent),
     //        ui->textEdit->setStyleSheet("body {background-color: #aaa}");
 }
 
+
 void Diary::show_log(QString log)
 {
     Log mylog;
@@ -162,6 +163,7 @@ void Diary::pushLogData(const Log &msg)
         cnt++;
     }
 }
+
 
 Diary::~Diary()
 {

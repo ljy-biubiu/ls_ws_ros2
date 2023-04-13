@@ -47,19 +47,14 @@ signals:
     void sigaltablepaint();
     //   void sigalareaindex(int index);
     void sigChangeArea_index(int);
-    void sigSaveAreaData();
-
+//    void sigSaveAreaData(Area);
+    void sigalreflushpaint();
+    void sigToPaintSaveAreaData();
 
 private slots:
     void on_tableWidget_cellChanged(int row, int column);
 
     void on_comboBox_activated(int index);
-
-    void on_lineEdit_times_textChanged(const QString &arg1);
-
-    void on_lineEdit_Area_height_max_textChanged(const QString &arg1);
-
-    void on_lineEdit_Area_height_min_textChanged(const QString &arg1);
 
     void on_lineEdit_textChanged(const QString &arg1);
 

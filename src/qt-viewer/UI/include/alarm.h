@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QLabel>
 #include <QTimer>
+#include <QVector>
+#include <QDebug>
 
 
 union SystemStatus {
@@ -76,7 +78,7 @@ public:
     explicit Alarm(QWidget *parent = nullptr);
     ~Alarm();
 
-    void setLED(QLabel* label, int color, int size ,int width);
+    void setLED(QLabel* label, int color, int size ,int width,int cnt_);
     QTimer *my_timer;
     void setLEDStatus( const AlarmStatus& msg  );
 
@@ -84,7 +86,11 @@ private:
     Ui::Alarm *ui;
     LEDSTATUS led_status;
     AlarmStatus alarm_status;
+    QVector<int> led_dat;
     //    AlarmStatus alarm_status;
+
+private slots:
+    void lidar_derect_result(QVector<int>);
 };
 
 #endif // ALARM_H

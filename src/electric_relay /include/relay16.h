@@ -12,7 +12,8 @@
 #include <vector>
 
 #include <std_msgs/msg/string.hpp>
-#include <std_msgs/msg/int32.hpp>
+#include <std_msgs/msg/int8.hpp>
+#include <std_msgs/msg/int8_multi_array.hpp>
 
 /*
 信号机配置：
@@ -80,6 +81,20 @@ unsigned char gpio_16pin_off[16][10] = {
 	{0xCC, 0xDD, 0xA1, 0x01, 0x00, 0x00, 0x40, 0x00, 0xE2, 0xC4},
 	{0xCC, 0xDD, 0xA1, 0x01, 0x00, 0x00, 0x80, 0x00, 0x22, 0x44}};
 
+struct RelayCmd
+{
+unsigned char header[2];
+unsigned char funcode;
+unsigned char addr;
+unsigned short contrlBit;
+unsigned short enablelBit;
+unsigned char crcH;
+unsigned char crcL;
+};
+
+struct RelayCmd relayCmd={0xCC,0xDD,0xA1,0x01,0,0,0xA2,0x44};
+
+
 void *test_fun(void *);
 void DisplayListDeviceInfo();
 void *SocketPthread_func(void *);
@@ -91,6 +106,13 @@ int securityRelayAlarmSingnalAPI(int gpioNum, int gpioState);
 void CloseSocketfd();
 
 void *dowork(void *);
+std::vector<int> electric_relay_flags;
+
+void parameterServerCallback(const std_msgs::msg::String::SharedPtr msg);
+void electric_relay_callback(const std_msgs::msg::Int8MultiArray::SharedPtr msg);
+void timerCallback();
+rclcpp::Node::SharedPtr node;
+rclcpp::TimerBase::SharedPtr timer_;
 
 
 #endif

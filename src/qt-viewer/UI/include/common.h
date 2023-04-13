@@ -13,28 +13,13 @@
 #include <pcl/point_cloud.h>
 #include <pcl/Vertices.h>
 #define PI 3.14159
-#define AREAS 3
+#define AREAS 16
 #define L_Range 10000
 #define Coord_proportion (L_Range * 2.0 / 1000)
 
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
-
-struct war
-{
-    pcl::PointXYZ point;
-    int dist;
-    float angle;
-    int index;
-};
-
-struct tableRow
-{
-    QTableWidgetItem itemx;
-    QTableWidgetItem itemy;
-    QTableWidgetItem itemz;
-};
 
 struct Box_Cloud
 {
@@ -57,13 +42,6 @@ struct Area
 };
 Q_DECLARE_METATYPE(Area)
 
-
-struct point_angle
-{
-    Box_Cloud point;
-    float angle;
-    float r;
-};
 
 struct lidar
 {
@@ -125,83 +103,7 @@ struct SetData
 };
 Q_DECLARE_METATYPE(SetData)
 
-struct point_data
-{
-    QList<QPointF> out;
-    QList<QPointF> in[3];
-    QList<QPointF> clust_in;
-    int lidarIndex;
-};
 
-struct data_set
-{
-    QPointF point;
-    bool visited;
-    bool isKey;
-    int dpId;
-    int cluterID;
-    QList<int> arrivalPointID;
-};
-struct point_column
-{
-    float startang;
-    float endang;
-    float r;
-    float x;
-    float y;
-    float z_min;
-    float z_max;
-};
-
-
-struct LidarData
-{
-    std::vector<float> angle;
-    std::vector<std::vector<int>> distance;
-    std::vector<std::vector<int>> intensity;
-    std::vector<std::vector<int>> LaserID;
-};
-
-struct LidarDataCHXXX
-{
-    std::vector<std::vector<float>> angle;
-    std::vector<std::vector<float>> distance;
-    std::vector<std::vector<int>> intensity;
-};
-
-struct LidarDataLS128S1
-{
-    std::vector<std::vector<float>> angle_h; // 水平角度储存
-    std::vector<std::vector<float>> angle_v; // 垂直角度储存
-    std::vector<std::vector<float>> distance;
-    std::vector<std::vector<int>> intensity;
-};
-
-struct LidarC1Data
-{
-    std::vector<float> angle;
-    std::vector<int> distance;
-    std::vector<int> intensity;
-};
-
-#if 1
-struct LidarPara
-{
-    QString IP;
-    int port;
-    pcl::PointXYZ base;
-    int heart;
-    bool connectstate;
-};
-Q_DECLARE_METATYPE(LidarPara)
-
-struct Boxcloud
-{
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr boxcloud1;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr boxcloud2;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr boxcloud3;
-};
-#endif
 struct lidarCloud
 {
     float r;
@@ -210,15 +112,5 @@ struct lidarCloud
     float y;
     float z;
 };
-#if 1
-struct lidarIntruder
-{
-    QString ip;
-    int port;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr tCloud;
-    bool war_alarm[3];
-};
-#endif
-Q_DECLARE_METATYPE(lidarIntruder)
 
 #endif // COMMON_H

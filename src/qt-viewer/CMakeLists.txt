@@ -15,7 +15,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -fdiagnostics-color=always)
 endif()
 
-SET(CMAKE_BUILD_TYPE "Release")
+# SET(CMAKE_BUILD_TYPE "Release")
+
 
 # set(CMAKE_PREFIX_PATH "DRIVER/CAMERA/lib/qt5/bin")
 set(CMAKE_AUTOMOC ON)
@@ -23,7 +24,6 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(QRC_FILES ./UI/resource/images.qrc ./UI/resource/qss.qrc ./UI/resource/webSource.qrc)
-
 
 file(GLOB OTHER_SOURCES  "UI/src/*.cpp"  "src/*.cpp" "Utility/*.cpp")
 
@@ -34,12 +34,12 @@ file(GLOB ALL_INCLUDES  "UI/include" "include" "Utility")
 ##"DRIVER/CAMERA/include/libavcodec/" "DRIVER/CAMERA/include/libavformat" "DRIVER/CAMERA/include/libavutil"         
 
 set(OTHER_SRCS ${OTHER_SOURCES} ${OTHER_INCLUDES})
-set(Qt5_DIR /opt/Qt5.14.2)
+ set(Qt5_DIR /opt/Qt5.14.2)
 find_package(Qt5 REQUIRED COMPONENTS Core WebEngineWidgets Widgets WebChannel WebEngineCore)
 
 set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5WebEngineWidgets_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
 
- set(UI_FILES ./UI/src/smsdialog.ui ./UI/src/aboutdialog.ui 
+set(UI_FILES ./UI/src/smsdialog.ui ./UI/src/aboutdialog.ui ./UI/src/alarm.ui ./UI/src/diary.ui
         ./UI/src/addpolygon.ui ./UI/src/cameraviewer.ui ./UI/src/childtitlebar.ui
          ./UI/src/maintitlebar.ui ./UI/src/setroi.ui ./UI/src/webui.ui )
 
