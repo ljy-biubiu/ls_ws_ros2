@@ -24,7 +24,6 @@ set(CMAKE_AUTOUIC ON)
 
 set(QRC_FILES ./UI/resource/images.qrc ./UI/resource/qss.qrc ./UI/resource/webSource.qrc)
 
-
 file(GLOB OTHER_SOURCES  "UI/src/*.cpp"  "src/*.cpp" "Utility/*.cpp")
 
 file(GLOB OTHER_INCLUDES  "UI/include/*.h*" "include/*.h*" "Utility/*.h")
@@ -44,7 +43,7 @@ set(UI_FILES ./UI/src/smsdialog.ui ./UI/src/aboutdialog.ui
          ./UI/src/maintitlebar.ui ./UI/src/setroi.ui ./UI/src/webui.ui )
 
 # find dependencies
-find_package(ament_cmake REQUIRED)
+ find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -117,7 +116,7 @@ ament_target_dependencies(${PROJECT_NAME}_node
         "sys_msgs"
         )
 
-if(BUILD_TESTING)
+ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()

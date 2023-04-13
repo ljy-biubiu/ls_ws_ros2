@@ -405,7 +405,7 @@ void PaintArea::mouseReleaseEvent(QMouseEvent *event)/*鼠标释放事件*/
         tmp.setY(event->pos().ry());
         qreal x = (tmp.rx() - rx)/zoom;
         qreal y = (tmp.ry() - ry)/zoom;
-        qDebug()<<"x"<<x<<"y"<<y<<"   curPolygonPos=" <<curPolygonPos;
+        // qDebug()<<"x"<<x<<"y"<<y<<"   curPolygonPos=" <<curPolygonPos;
 
         index = area[curPolygonPos-1].Area2D_point.size();
         PointT pt,pt_T;

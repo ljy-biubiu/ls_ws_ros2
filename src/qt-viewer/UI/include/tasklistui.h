@@ -13,6 +13,8 @@
 #include "QHeaderView"
 #include "QPushButton"
 #include "QLabel"
+#include "QVector"
+#include <jsoncpp/json/json.h>
 
 
 class TaskListUi : public QWidget
@@ -22,7 +24,6 @@ public:
     explicit TaskListUi(QWidget *parent = 0);
 
 private:
-
     void getQRadiobuttonItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,QRadioButton * & radiobutton,const QString &info);
     void getQCheckBoxItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,QCheckBox * & checkbox,const QString &info);
     void getQLineEditItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,QLineEdit * & lineedit,const QString &info);
@@ -35,9 +36,71 @@ private:
     QLineEdit* creteQlineEditItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,const QString &info);
     QComboBox* creteQComboBoxEditItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,const QString &info,const QStringList &list);
 
-// signals:
+private:
+    //    QVector<QLineEdit*> vec_line_edit_ip;
+    //    QVector<QLineEdit*> vec_line_edit_port;
+    //    QVector<QLineEdit*> vec_LM_line_edit_x;
+    //    QVector<QLineEdit*> vec_LM_line_edit_y;
+    //    QVector<QLineEdit*> vec_LM_line_edit_z;
+    //    QVector<QLineEdit*> vec_LM_line_edit_picth;
+    //    QVector<QLineEdit*> vec_LM_line_edit_roll;
+    //    QVector<QLineEdit*> vec_LM_line_edit_yaw;
+    //    QVector<QVector<QLineEdit*>> vec_lidar_datas;
 
-// public slots:
+
+    QLineEdit* LM_line_edit_ServerAddress ;
+    QLineEdit* LM_line_edit_ServerPort ;
+    QLineEdit* LM_line_edit_UploadDataAddress ;
+    QLineEdit* LM_line_edit_UplodaDeviceId ;
+
+    QLineEdit* LM_line_Area_height_down ;
+    QLineEdit* LM_line_Area_height_top ;
+    QLineEdit* LM_line_edit_K ;
+    QLineEdit* LM_line_euclidean_disatance ;
+    QLineEdit* LM_line_interpolation_interval ;
+    QLineEdit* LM_line_m_grid_x ;
+    QLineEdit* LM_line_m_grid_y ;
+    QLineEdit* LM_line_m_grid_z ;
+    QLineEdit* LM_line_resolution ;
+    QLineEdit* LM_line_start_dist ;
+
+    QLineEdit* LM_line_edit_Tolerance ;
+    QLineEdit* LM_line_edit_maxSize ;
+    QLineEdit* LM_line_edit_minSize ;
+
+    QLineEdit* LM_line_edit_lidar_IP ;
+    QLineEdit* LM_line_edit_lidar_device_port ;
+    QLineEdit* LM_line_edit_lidar_data_port ;
+    QLineEdit* LM_line_edit_lidar_x ;
+    QLineEdit* LM_line_edit_lidar_y ;
+    QLineEdit* LM_line_edit_lidar_z ;
+    QLineEdit* LM_line_edit_lidar_picth ;
+    QLineEdit* LM_line_edit_lidar_roll ;
+    QLineEdit* LM_line_edit_lidar_yaw ;
+
+    QLineEdit* LM_line_edit_camera_IP ;
+    QLineEdit* LM_line_edit_camera_ID ;
+    QLineEdit* LM_line_edit_camera_Pass ;
+
+    QLineEdit* LM_line_edit_3d_lidar_id;
+    QLineEdit* LM_line_edit_SendAddress ;
+    QLineEdit* LM_line_edit_SendPort;
+    QLineEdit* LM_line_edit_info_topic;
+    QLineEdit* LM_line_edit_status_topic;
+
+
+    QPushButton * comfire_button;
+    QTreeWidgetItem * buttonItem;
+    QVector<QLineEdit*> vec_LM_line_edit_sum;
+
+signals:
+    void sigSavePushButton(QString);
+
+private slots:
+    void savePushButton();
+    void updateTopicParams(QString);
+
+    // public slots:
 };
 
 #endif // TASKLISTUI_H

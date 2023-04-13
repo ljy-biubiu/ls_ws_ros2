@@ -4,6 +4,7 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     : QMainWindow(parent), my_app(my_app_)
 {
     qRegisterMetaType<PointCloudTPtr>("PointCloudTPtr");
+    qRegisterMetaType<DectData>("DectData");
 
     setWindowTitle(tr("PortMonitor"));
 
@@ -35,6 +36,8 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     screen = new QSplashScreen(pixmap);
     screen->show();
 
+    //    task_list_ui->show();
+
     // auto aaa = std::make_unique<TaskListUi>(this);
     // aaa->show();
 }
@@ -61,6 +64,8 @@ void MainWindow::initObeject()
     camera_viewer2 = new CameraViewer();
     web_ui = new WebUi();
     add_lidar = new AddLidar();
+
+    task_list_ui = new TaskListUi(this);
 }
 
 void MainWindow::mainEventCallback()
@@ -103,7 +108,7 @@ void MainWindow::updatePointCould()
     static PointCloudTPtr msg;
     msg.reset(new PointCloudT);
 
-    //this->params_event->getTotalParams().drive.lidar_drive.get_lidar_data(msg);
+    // this->params_event->getTotalParams().drive.lidar_drive.get_lidar_data(msg);
 
     paint_area->xCloud->clear();
     *paint_area->xCloud = *msg;
@@ -116,6 +121,85 @@ void MainWindow::updatePointCould()
 
     this->viewer->getRenderWindow()->GetInteractor()->Render();
     qvtkOpenglNativeWidget->update();
+}
+
+// 0 other
+// 2 AMR
+// 1 people
+
+void MainWindow::show_dect_data(DectData msg)
+{
+    paint_area->xCloud->clear();
+    *paint_area->xCloud = *msg.Origin_Cloud;
+    paint_area->update();
+
+    this->viewer->removeAllPointClouds();
+    this->viewer->removeAllShapes();
+
+    std::string ori_cloud_name = "ori_cloud";
+    this->viewer->addPointCloud(msg.Origin_Cloud, ori_cloud_name);
+
+    int i{0};
+    for (auto dat : msg.ObjCloud_vec)
+    {
+        // *dat;
+        std::string det_cloud_name = "det_cloud_" + std::to_string(i);
+        this->viewer->addPointCloud(dat, det_cloud_name);
+        i++;
+    }
+
+    for (auto dat : msg.Data_vec)
+    {
+        std::string cube = "box" + std::to_string(i);
+        Eigen::Vector3f translation(dat.center_x, dat.center_y, dat.center_z);
+        Eigen::Quaternionf rotation(1, 0, 0, 0); //_cluster.heading * M_PI / 180.0
+        this->viewer->addCube(translation, rotation, dat.length, dat.width, dat.height, cube);
+        this->viewer->setRepresentationToWireframeForAllActors();
+
+        if (dat.kind_risk == "clash")
+        {
+            this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1, 0, 0, cube);
+        }
+        else if (dat.kind_risk == "avoidance")
+        {
+            this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1, 0, 0, cube);
+        }
+        else
+        {
+            this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0, 1, 0, cube);
+        }
+
+        PointT linesLCenterPoint;
+        linesLCenterPoint.x = dat.center_x;
+        linesLCenterPoint.y = dat.center_y;
+        linesLCenterPoint.z = dat.center_z;
+
+        std::string sum_text;
+        std::string classify_name;
+        switch (dat.classify)
+        {
+        case 0:
+            classify_name = "other";
+            break;
+        case 2:
+            classify_name = "AMR";
+            break;
+        case 1:
+            classify_name = "people";
+            break;
+        default:
+            break;
+        }
+        sum_text = "classify : " + classify_name + "\nspeed : " + std::to_string(dat.speed);
+        this->viewer->addText3D(sum_text, linesLCenterPoint, 0.1, 1.0, 1.0, 1.0, "line1Text3D_" + std::to_string(i));
+        this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.4, cube);
+        i++;
+    }
+
+    this->viewer->getRenderWindow()->GetRenderers()->GetFirstRenderer()->Render();
+    this->viewer->getRenderWindow()->Render();
+    qvtkOpenglNativeWidget->update();
+    // std::cout << "*******************************" << std::endl;
 }
 
 void MainWindow::receive_lidar_driver(PointCloudTPtr msg)
@@ -133,7 +217,7 @@ void MainWindow::receive_lidar_driver(PointCloudTPtr msg)
     this->viewer->getRenderWindow()->GetInteractor()->Render();
     qvtkOpenglNativeWidget->update();
 }
-//PointCloudTPtr
+// PointCloudTPtr
 
 void MainWindow::initPointCShow()
 {
@@ -330,14 +414,16 @@ void MainWindow::initConnect()
     QObject::connect(add_lidar, SIGNAL(SendSet(QString)), this, SLOT(params_set(QString)));
     QObject::connect(setROI, SIGNAL(sigChangeArea_index(int)), paint_area, SLOT(UpdateArea_index(int)));
     QObject::connect(setROI, SIGNAL(sigSaveAreaData()), this, SLOT(getAreaDatas()));
-    QObject::connect(ros_talk, SIGNAL(emitTopicParams(QString)), this, SLOT(updateTopicParams(QString)));
     QObject::connect(this, SIGNAL(emitTopicSetParams(QString)), ros_talk, SLOT(saveTopicParams(QString)));
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer2, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_lidar_drive(PointCloudTPtr)), this, SLOT(receive_lidar_driver(PointCloudTPtr)));
     QObject::connect(this, SIGNAL(uploadLog(QMultiMap<QString, QString>)), this, SLOT(receive_lidar_driver(QMultiMap<QString, QString>)));
     QObject::connect(ros_talk, SIGNAL(emit_show_log(QString)), diary, SLOT(show_log(QString)));
-    
+    QObject::connect(ros_talk, SIGNAL(emit_decct_data(DectData)), this, SLOT(show_dect_data(DectData)));
+    QObject::connect(this->task_list_ui, SIGNAL(sigSavePushButton(QString)), ros_talk, SLOT(saveLidarDatas(QString)));
+    QObject::connect(ros_talk, SIGNAL(emitTopicParams(QString)), task_list_ui, SLOT(updateTopicParams(QString)));
+    QObject::connect(this, SIGNAL(emit2dlists(QList<QList<PointT>>)), ros_talk, SLOT(save2dlists(QList<QList<PointT>>)));
 }
 
 void MainWindow::createActions()
@@ -346,7 +432,8 @@ void MainWindow::createActions()
 
 void MainWindow::param_set_Action()
 {
-    this->add_lidar->show();
+    //    this->add_lidar->show();
+    task_list_ui->show();
 }
 
 void MainWindow::lidar_area_set_Action()
@@ -381,15 +468,51 @@ CameraViewer *MainWindow::getCameraWidget()
     return this->camera_viewer;
 }
 
+// void MainWindow::getAreaDatas()
+// {
+
+// }
+
 void MainWindow::getAreaDatas()
 {
+    //    // QList<PointT> tmp;
+    //    // 地面层
+    //    auto tmp = this->paint_area->area[0].Area2D_point_T;
+
+    //    std::cout << " this->paint_area->area[0].Area2D_point_T" << this->paint_area->area[0].Area2D_point_T.size() << std::endl;
+    //    std::cout << " tmp.size()" << tmp.size() << std::endl;
+    //    for (int j = 0; j < tmp.size(); j++)
+    //    {
+    //        std::cout << "tmp[j].x:" << tmp[j].x << " tmp[j].y :" << tmp[j].y << std::endl;
+    //        // cv::Point2d point2D(tmp[j].x, tmp[j].y);
+    //        // params_event->getTotalParams().baseParams.roiArea.ground.push_back(point2D);
+    //    }
+
+
+
+    QList<QList<PointT>> area_lists;
+
+    for(int i{0};3>i;i++)
+    {
+        area_lists.push_back(this->paint_area->area[i].Area2D_point_T);
+    }
+
+    emit emit2dlists(area_lists);
+
+
+//    auto tmp = this->paint_area->area[0].Area2D_point_T;
+
+//    std::cout << " this->paint_area->area[0].Area2D_point_T" << this->paint_area->area[0].Area2D_point_T.size() << std::endl;
+//    std::cout << " tmp.size()" << tmp.size() << std::endl;
+//    for (int j = 0; j < tmp.size(); j++)
+//    {
+//        std::cout << "tmp[j].x:" << tmp[j].x << " tmp[j].y :" << tmp[j].y << std::endl;
+//        // cv::Point2d point2D(tmp[j].x, tmp[j].y);
+//        // params_event->getTotalParams().baseParams.roiArea.ground.push_back(point2D);
+//    }
 }
 
-void MainWindow::updateTopicParams(QString msg)
-{
-    // qDebug() << "updateTopicParams:" << msg;
-    add_lidar->ShowData(msg);
-}
+
 
 void MainWindow::params_set(QString msg)
 {

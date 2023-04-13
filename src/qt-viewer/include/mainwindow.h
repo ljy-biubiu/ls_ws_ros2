@@ -15,6 +15,7 @@
 #include "webui.h"
 #include "tasklistui.h"
 
+
 // Visualization Toolkit (VTK)
 #include <QVTKWidget.h>
 #include <vtkRenderWindow.h>
@@ -43,13 +44,13 @@
 #include <QSplashScreen>
 #include <QSharedPointer>
 
-#include <QMetaType>                            //自定义参数类型的头文件----***
+#include <QMetaType> //自定义参数类型的头文件----***
 
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
 
-Q_DECLARE_METATYPE(PointCloudTPtr)             //要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
+Q_DECLARE_METATYPE(PointCloudTPtr) // 要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
 
 
 QT_BEGIN_NAMESPACE
@@ -66,7 +67,7 @@ public:
 
     void updatePointCould();
 
-    QSplashScreen* getqSplashScreen()
+    QSplashScreen *getqSplashScreen()
     {
         return screen;
     }
@@ -145,6 +146,7 @@ private:
     QAction *param_set;
     QAction *lidar_area_set;
     QSplashScreen *screen;
+    TaskListUi* task_list_ui;
 
 private slots:
     void view_mode_Action();
@@ -153,14 +155,15 @@ private slots:
     void param_set_Action();
     void lidar_area_set_Action();
     void getAreaDatas();
-    void updateTopicParams(QString);
     void params_set(QString);
     void receive_lidar_driver(PointCloudTPtr);
+    void show_dect_data(DectData msg);
     // void show_log(QString);
-    
 
 signals:
     void emitTopicSetParams(QString);
     void uploadLog(QMultiMap<QString, QString>);
+    void emitTopicParams(QString);
+    void emit2dlists(QList<QList<PointT>>);
 };
 #endif // MAINWINDOW_H
