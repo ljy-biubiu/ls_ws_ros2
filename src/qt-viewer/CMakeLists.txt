@@ -16,7 +16,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 
-#SET(CMAKE_BUILD_TYPE "Release")
+
+#SET(CMAKE_BUILD_TYPE "Debug")
 
 # set(CMAKE_PREFIX_PATH "DRIVER/CAMERA/lib/qt5/bin")
 set(CMAKE_AUTOMOC ON)
@@ -41,7 +42,7 @@ set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5WebEngineWidg
 
 set(UI_FILES ./UI/src/smsdialog.ui ./UI/src/aboutdialog.ui  ./UI/src/alarm.ui ./UI/src/diary.ui
         ./UI/src/addpolygon.ui ./UI/src/cameraviewer.ui ./UI/src/childtitlebar.ui
-         ./UI/src/maintitlebar.ui ./UI/src/setroi.ui ./UI/src/webui.ui )
+         ./UI/src/maintitlebar.ui ./UI/src/setroi.ui ./UI/src/webui.ui ./UI/src/addlidar.ui )
 
 # find dependencies
  find_package(ament_cmake REQUIRED)

@@ -22,14 +22,25 @@ void RosTalk::init()
     //  parameter_server_pub_ = this->create_publisher<std_msgs::msg::String>(
     //      "/params_config/parameter_server", rclcpp::QoS{1}.transient_local());
 
-    parameter_server_pub_ =
-            node->create_publisher<std_msgs::msg::String>("/params_config/parameter_server", rclcpp::QoS{1}.transient_local());
+    //    parameter_server_pub_ =
+    //            node->create_publisher<std_msgs::msg::String>("/params_config/parameter_server", rclcpp::QoS{1}.transient_local());
 
     save_param_pub_ =
-            node->create_publisher<std_msgs::msg::String>("/params_config/save_params", rclcpp::QoS{1}.transient_local());
+            node->create_publisher<std_msgs::msg::String>("/qt_viewer/save_params", rclcpp::QoS{1}.transient_local());
 
     to_d_area_pub_ =
-            node->create_publisher<sys_msgs::msg::ToDArea>("/qt_viewer/to_d_area", rclcpp::QoS{1}.transient_local());
+            node->create_publisher<sys_msgs::msg::ToDArea>("/qt_viewer/area_points", rclcpp::QoS{1}.transient_local());
+
+    log_pub_ = node->create_publisher<std_msgs::msg::String>(
+                "/log_sys/log", rclcpp::QoS{1}.transient_local());
+
+    heart_keeper_pub_ = node->create_publisher<std_msgs::msg::String>(
+                "/qt_viewer/heart_keep", rclcpp::QoS{1}.transient_local());
+
+    save_point_cloud_pub_ = node->create_publisher<std_msgs::msg::Int8MultiArray>(
+                "/qt_viewer/save_point_cloud", rclcpp::QoS{1}.durability_volatile());
+
+
 
     // 订阅话题
     // parameter_server_sub = this->create_subscription<std_msgs::msg::String>(
@@ -40,10 +51,17 @@ void RosTalk::init()
     // parameter_server_sub = node->create_subscription<std_msgs::msg::String>("ros2_qt_demo_publish", rclcpp::QoS{10}.transient_local(), std::bind(&RosTalk::parameterServerCallback, this, std::placeholders::_1));
 
     parameter_server_sub = node->create_subscription<std_msgs::msg::String>(
-                "/params_config/parameter_server",
+                "/algorithm/parameter_server",
                 rclcpp::QoS{1}.transient_local(),
                 [this](const std_msgs::msg::String::SharedPtr msg)
     { parameterServerCallback(msg); });
+
+    to_d_area_sub = node->create_subscription<sys_msgs::msg::ToDArea>(
+                "/algorithm/area_points",
+                rclcpp::QoS{1}.transient_local(),
+                [this](const sys_msgs::msg::ToDArea::SharedPtr msg)
+    { to_d_area_Callback(msg); });
+
 
     camera_drive_sub = node->create_subscription<sensor_msgs::msg::Image>(
                 "/carama_driver/imgae",
@@ -58,7 +76,7 @@ void RosTalk::init()
     { lidar_driver_callback(msg); });
 
     algorithm_data_sub = node->create_subscription<sys_msgs::msg::DectData>(
-                "/DecctData_msg",
+                "/algorithm/perception_data",
                 rclcpp::QoS{1},
                 [this](const sys_msgs::msg::DectData::SharedPtr msg)
     { decct_data_callback(msg); });
@@ -68,12 +86,6 @@ void RosTalk::init()
                 rclcpp::QoS{1}.transient_local(),
                 [this](const std_msgs::msg::String::SharedPtr msg)
     { log_callback(msg); });
-
-    log_pub_ = node->create_publisher<std_msgs::msg::String>(
-                "/log_sys/log", rclcpp::QoS{1}.transient_local());
-
-    heart_keeper_pub_ = node->create_publisher<std_msgs::msg::String>(
-                "/qt_viewer/heart_keep", rclcpp::QoS{1}.transient_local());
 
     // ros2 topic echo --qos-profile services_default --qos-durability
     // transient_local  /cti/error_status/set 定时器
@@ -113,6 +125,55 @@ void RosTalk::run()
 //   //  RCLCPP_INFO(node->get_logger(), "I heard: '%d'", msg->data);
 //   emitTopicData("I head from ros2_qt_demo_publish:" + QString::fromStdString(std::to_string(msg->data)));
 // }
+
+
+void RosTalk::save_point_cloud(int msg)
+{
+    std_msgs::msg::Int8MultiArray dat;
+    for(int j= 0 ; j<2 ; j++ )
+    {
+        dat.data.push_back(0);
+    }
+    dat.data[0] = msg;
+    save_point_cloud_pub_->publish(dat);
+}
+
+void RosTalk::save_point_backgroud_cloud(int msg)
+{
+    std_msgs::msg::Int8MultiArray dat;
+    for(int j= 0 ; j<2 ; j++ )
+    {
+        dat.data.push_back(0);
+    }
+    dat.data[1] = msg;
+    save_point_cloud_pub_->publish(dat);
+}
+
+
+
+void RosTalk::to_d_area_Callback(const sys_msgs::msg::ToDArea::SharedPtr &msg)
+{
+    std::cout<<"to_d_area_Callback"<<std::endl;
+    QList<QList<PointT>> qt_msg;
+
+    for( auto dat_top : msg->area )
+    {
+        QList<PointT> qt_top;
+        for( auto dat_down : dat_top.point_array )
+        {
+            PointT point;
+            point.x = dat_down.x;
+            point.y = dat_down.y;
+            point.z = dat_down.z;
+            qt_top.push_back(point);
+        }
+        qt_msg.push_back(qt_top);
+    }
+
+    emit ros_to_qt_area_points(qt_msg);
+
+
+}
 
 
 

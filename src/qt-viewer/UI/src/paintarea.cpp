@@ -78,7 +78,13 @@ void PaintArea::setCentralArea(const int& x,const int& y)
 
 void PaintArea::setAreaSize(int radius)
 {
+    Radius = radius;
+}
+
+void PaintArea::SlotAreaSize(int radius)
+{
     LidarInstance.lidar_Radius = radius;
+    update();
 }
 
 

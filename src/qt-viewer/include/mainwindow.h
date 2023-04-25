@@ -123,13 +123,15 @@ private:
     QVBoxLayout *mainLayout;
     QVBoxLayout *headLayout;
     QHBoxLayout *body_layout;
-    QVBoxLayout *left_body_layout;
+    QHBoxLayout *left_body_layout;
     QVBoxLayout *right_body_layout;
     QHBoxLayout *layout;
     QHBoxLayout *right_camera_layout;
     QHBoxLayout *right_data_layout;
     QHBoxLayout *right_table_layout;
     QVBoxLayout *vtkLayout;
+    QVBoxLayout *imageWidget_layout;
+    QVBoxLayout *paramsListLayout;
     QVBoxLayout *cameraLayout;
 
     QLabel *imageLabel;
@@ -145,6 +147,9 @@ private:
     QAction *view2_mode;
     QAction *param_set;
     QAction *lidar_area_set;
+    QAction *save_point_cloud;
+    QAction *svae_background_pont_cloud;
+
     QSplashScreen *screen;
     TaskListUi* task_list_ui;
 
@@ -158,6 +163,10 @@ private slots:
     void params_set(QString);
     void receive_lidar_driver(PointCloudTPtr);
     void show_dect_data(DectData msg);
+    void setAreaDatas(QList<QList<PointT>> msg);
+    void save_point_backgourd_cloud_set_Action();
+    void save_point_cloud_set_Action();
+
     // void show_log(QString);
 
 signals:
@@ -165,5 +174,7 @@ signals:
     void uploadLog(QMultiMap<QString, QString>);
     void emitTopicParams(QString);
     void emit2dlists(QList<QList<PointT>>);
+    void emit_save_point_cloud(int);
+    void emit_save_point_backgourd_cloud(int);
 };
 #endif // MAINWINDOW_H

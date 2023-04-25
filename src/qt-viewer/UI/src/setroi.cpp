@@ -152,14 +152,12 @@ void SetROI::on_lineEdit_Area_height_min_textChanged(const QString &arg1)
     emit sigaltablepaint();
 }
 
-//void SetROI::on_lineEdit_editingFinished(const QString &arg1)
-//{
-//    emit sigalareasize();
-//}
 
 void SetROI::on_lineEdit_textChanged(const QString &arg1)
 {
     emit sigalareasize(arg1.toInt());
+//    this->pa
+
 }
 
 void SetROI::on_pushButton_comfire_clicked()

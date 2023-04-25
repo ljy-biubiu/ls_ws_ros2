@@ -57,7 +57,7 @@ public:
     int                                 warning_type[3];
 
     int col =20;
-    float Radius = 100;
+    float Radius = 400;
     QPointF mousemovepoint;
 
 
@@ -99,6 +99,7 @@ public slots:
 
     void setCentralArea(const int& x,const int& y);
     void setAreaSize(int radius);
+    void SlotAreaSize(int);
 
 
 signals:

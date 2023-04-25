@@ -5,6 +5,7 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
 {
     qRegisterMetaType<PointCloudTPtr>("PointCloudTPtr");
     qRegisterMetaType<DectData>("DectData");
+    qRegisterMetaType<QList<QList<PointT>>>("QList<QList<PointT>>");
 
     setWindowTitle(tr("PortMonitor"));
 
@@ -70,6 +71,16 @@ void MainWindow::initObeject()
 
 void MainWindow::mainEventCallback()
 {
+
+    my_timer = new QTimer(this);
+    my_timer->start(100);
+    connect(my_timer, &QTimer::timeout, [=]()
+    {
+        if(paint_area != nullptr && setROI != nullptr)
+        {
+            paint_area_2setROI();
+        } });
+
 }
 
 void MainWindow::paint_area_2setROI()
@@ -85,6 +96,8 @@ void MainWindow::paint_area_2setROI()
     }
     setROI->showPoint();
 }
+
+
 
 void MainWindow::updateCameraImage()
 {
@@ -129,6 +142,7 @@ void MainWindow::updatePointCould()
 
 void MainWindow::show_dect_data(DectData msg)
 {
+    //    return;
     paint_area->xCloud->clear();
     *paint_area->xCloud = *msg.Origin_Cloud;
     paint_area->update();
@@ -196,6 +210,37 @@ void MainWindow::show_dect_data(DectData msg)
         i++;
     }
 
+
+    //2D paint
+    vector<vector<PointT>> areaPoints;
+    for(int i{0};3>i;i++)
+    {
+        vector<PointT> linePoints;
+        //        Point.x = this->paint_area->area[i].Area2D_point_T.x;
+        //        LinePoints.push_back(this->paint_area->area[i].Area2D_point_T);
+        for(int j{0};this->paint_area->area[i].Area2D_point_T.size()>j;j++)
+        {
+            PointT point;
+            point.x = this->paint_area->area[i].Area2D_point_T[j].x;
+            point.y = this->paint_area->area[i].Area2D_point_T[j].y;
+            point.z = this->paint_area->area[i].Area2D_point_T[j].z;
+            linePoints.push_back(point);
+        }
+        areaPoints.push_back(linePoints);
+    }
+
+    for(int i{0};areaPoints.size()>i;i++)
+    {
+        if(this->paint_area->area[i].Area2D_point_T.size()<2)
+            continue;
+        for(int j{0};areaPoints[i].size()-1>j;j++)
+        {
+            this->viewer->addLine(areaPoints[i][j],areaPoints[i][j+1], 1, 0, 0,"line:"+ to_string(i) + to_string(j));
+            this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "line:"+ to_string(i) + to_string(j));
+        }
+    }
+
+
     this->viewer->getRenderWindow()->GetRenderers()->GetFirstRenderer()->Render();
     this->viewer->getRenderWindow()->Render();
     qvtkOpenglNativeWidget->update();
@@ -249,15 +294,17 @@ void MainWindow::mainLayOut()
     this->headLayout = new QVBoxLayout();
     this->body_frame_layout = new QVBoxLayout();
     this->body_layout = new QHBoxLayout();
-    this->left_body_layout = new QVBoxLayout();
+    this->left_body_layout = new QHBoxLayout();
     this->right_body_layout = new QVBoxLayout();
 
     this->right_camera_layout = new QHBoxLayout();
     this->right_data_layout = new QHBoxLayout();
     this->right_table_layout = new QHBoxLayout();
 
+    this->paramsListLayout = new QVBoxLayout();
     this->vtkLayout = new QVBoxLayout();
     this->cameraLayout = new QVBoxLayout();
+    this->imageWidget_layout  = new QVBoxLayout(this);
 
     this->right_camera_widget = new QWidget();
     this->right_data_widget = new QWidget();
@@ -337,8 +384,23 @@ void MainWindow::mainLayOut()
 
     imageWidget->setLayout(vtkLayout);
     vtkLayout->addWidget(qvtkOpenglNativeWidget);
-    left_body_layout->addWidget(imageWidget);
+    paramsListLayout->addWidget(task_list_ui);
+
+    imageWidget_layout->addWidget(imageWidget);
+
+    left_body_layout->addLayout(paramsListLayout);
+    left_body_layout->addLayout(imageWidget_layout);
+    //    left_body_layout->setStretchFactor(paramsListLayout, 4);
+    //    left_body_layout->setStretchFactor(imageWidget_layout, 9);
     // left_body_layout->addWidget(camera_viewer);
+
+
+    for (int i = 0; i < paramsListLayout->count(); ++i) {
+        QWidget* w = paramsListLayout->itemAt(i)->widget();
+        if (w != NULL)
+            w->setVisible(false);
+    }
+
 }
 
 /*删除layout*/
@@ -382,17 +444,29 @@ void MainWindow::initMenu()
     param_set = new QAction(tr("&Params"), this);
     lidar_area_set = new QAction(tr("&Areas"), this);
 
+    save_point_cloud = new QAction(tr("&saveCloud"), this);
+    svae_background_pont_cloud =new QAction(tr("&saveBCloud"), this);
+
+
     connect(view_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode_Action()));
     connect(view1_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode1_Action()));
     connect(view2_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode2_Action()));
     connect(param_set, SIGNAL(triggered(bool)), this, SLOT(param_set_Action()));
     connect(lidar_area_set, SIGNAL(triggered(bool)), this, SLOT(lidar_area_set_Action()));
+    connect(save_point_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_cloud_set_Action()));
+    connect(svae_background_pont_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_backgourd_cloud_set_Action()));
 }
+
 
 void MainWindow::initToolBar()
 {
     // add a toolbar and add its actions
     fileToolBar = new QToolBar(this);
+    auto my_meun = new QMenu(this);
+
+    //    fileToolBar->men
+    //    fileToolBa
+    //    fileMenu
 
     fileToolBar->addAction(view_mode);
     fileToolBar->addAction(view1_mode);
@@ -403,8 +477,18 @@ void MainWindow::initToolBar()
     fileToolBar->addAction(param_set);
     fileToolBar->addAction(lidar_area_set);
 
+    fileToolBar->addSeparator();
+
+    fileToolBar->addAction(save_point_cloud);
+    fileToolBar->addAction(svae_background_pont_cloud);
+
+
+
     // addToolBar(Qt::LeftToolBarArea,fileToolBar);
     addToolBar(Qt::BottomToolBarArea, fileToolBar);
+    //    static QMenu *fileMenu = menuBar()->addMenu ( tr ( "&File" ) );
+    //    fileMenu->addAction(view_mode);
+    //    this->add
     //    addToolBarBreak(Qt::BottomToolBarArea);
     //    addToolBar(Qt::BottomToolBarArea, toolBar);
 }
@@ -413,28 +497,87 @@ void MainWindow::initConnect()
 {
     QObject::connect(add_lidar, SIGNAL(SendSet(QString)), this, SLOT(params_set(QString)));
     QObject::connect(setROI, SIGNAL(sigChangeArea_index(int)), paint_area, SLOT(UpdateArea_index(int)));
+    QObject::connect(setROI, SIGNAL(sigalareasize(int)), paint_area, SLOT(SlotAreaSize(int)));
     QObject::connect(setROI, SIGNAL(sigSaveAreaData()), this, SLOT(getAreaDatas()));
     QObject::connect(this, SIGNAL(emitTopicSetParams(QString)), ros_talk, SLOT(saveTopicParams(QString)));
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer2, SLOT(setCameraMat(QPixmap)));
     QObject::connect(ros_talk, SIGNAL(emit_lidar_drive(PointCloudTPtr)), this, SLOT(receive_lidar_driver(PointCloudTPtr)));
-    QObject::connect(this, SIGNAL(uploadLog(QMultiMap<QString, QString>)), this, SLOT(receive_lidar_driver(QMultiMap<QString, QString>)));
     QObject::connect(ros_talk, SIGNAL(emit_show_log(QString)), diary, SLOT(show_log(QString)));
     QObject::connect(ros_talk, SIGNAL(emit_decct_data(DectData)), this, SLOT(show_dect_data(DectData)));
     QObject::connect(this->task_list_ui, SIGNAL(sigSavePushButton(QString)), ros_talk, SLOT(saveLidarDatas(QString)));
     QObject::connect(ros_talk, SIGNAL(emitTopicParams(QString)), task_list_ui, SLOT(updateTopicParams(QString)));
     QObject::connect(this, SIGNAL(emit2dlists(QList<QList<PointT>>)), ros_talk, SLOT(save2dlists(QList<QList<PointT>>)));
+    QObject::connect(ros_talk, SIGNAL(ros_to_qt_area_points(QList<QList<PointT>>)), this, SLOT(setAreaDatas(QList<QList<PointT>>)));
+
+    QObject::connect(this, SIGNAL(emit_save_point_cloud(int)), ros_talk, SLOT(save_point_cloud(int)));
+    QObject::connect(this, SIGNAL(emit_save_point_backgourd_cloud(int)), ros_talk, SLOT(save_point_backgroud_cloud(int)));
+
+    //    setAreaDatas(QList<QList<PointT>> msg);
 }
 
 void MainWindow::createActions()
 {
 }
 
+
+
+void MainWindow::save_point_backgourd_cloud_set_Action()
+{
+    //QMessageBox mb(QMessageBox::NoIcon,"提示","按一下",QMessageBox::Yes|QMessageBox::No,&w);
+    QMessageBox mb(this);
+    mb.setWindowTitle("提示");
+    mb.setText("是否保存当前背景点云");
+    /*QPushButton *but1=*/mb.addButton("是",QMessageBox ::AcceptRole);
+    /*QPushButton *but2=*/mb.addButton("否",QMessageBox ::RejectRole);
+    mb.show();
+    switch(mb.exec())
+
+    {
+    case QMessageBox::AcceptRole:
+        QMessageBox::information(this,"提示","");//默认是模态的
+        emit emit_save_point_backgourd_cloud(1);
+        break;
+        //    case QMessageBox::RejectRole:
+        ////        QMessageBox::critical(this,"错误","wrong");//默认是模态的
+        //        break;
+    }
+}
+
+
+void MainWindow::save_point_cloud_set_Action()
+{
+    //QMessageBox mb(QMessageBox::NoIcon,"提示","按一下",QMessageBox::Yes|QMessageBox::No,&w);
+    QMessageBox mb(this);
+    mb.setWindowTitle("提示");
+    mb.setText("是否保存当前点云");
+    /*QPushButton *but1=*/mb.addButton("是",QMessageBox ::AcceptRole);
+    /*QPushButton *but2=*/mb.addButton("否",QMessageBox ::RejectRole);
+    mb.show();
+    switch(mb.exec())
+
+    {
+    case QMessageBox::AcceptRole:
+        QMessageBox::information(this,"提示","");//默认是模态的
+        emit emit_save_point_cloud(1);
+        break;
+        //    case QMessageBox::RejectRole:
+        ////        QMessageBox::critical(this,"错误","wrong");//默认是模态的
+        //        break;
+    }
+}
+
 void MainWindow::param_set_Action()
 {
     //    this->add_lidar->show();
-    task_list_ui->show();
+    //    task_list_ui->show();
+    for (int i = 0; i < paramsListLayout->count(); ++i) {
+        QWidget* w = paramsListLayout->itemAt(i)->widget();
+        if (w != NULL)
+            w->setVisible(true);
+    }
 }
+
 
 void MainWindow::lidar_area_set_Action()
 {
@@ -448,7 +591,9 @@ void MainWindow::view_mode_Action()
     body_frame_layout->addWidget(mainImageWidget);
     mainImageWidget->setLayout(body_layout);
 
-    left_body_layout->addWidget(imageWidget);
+    //    left_body_layout->addWidget(imageWidget);
+    //    vtkLayout->addWidget(qvtkOpenglNativeWidget);
+    imageWidget_layout->addWidget(imageWidget);
 }
 
 void MainWindow::view_mode1_Action()
@@ -475,20 +620,6 @@ CameraViewer *MainWindow::getCameraWidget()
 
 void MainWindow::getAreaDatas()
 {
-    //    // QList<PointT> tmp;
-    //    // 地面层
-    //    auto tmp = this->paint_area->area[0].Area2D_point_T;
-
-    //    std::cout << " this->paint_area->area[0].Area2D_point_T" << this->paint_area->area[0].Area2D_point_T.size() << std::endl;
-    //    std::cout << " tmp.size()" << tmp.size() << std::endl;
-    //    for (int j = 0; j < tmp.size(); j++)
-    //    {
-    //        std::cout << "tmp[j].x:" << tmp[j].x << " tmp[j].y :" << tmp[j].y << std::endl;
-    //        // cv::Point2d point2D(tmp[j].x, tmp[j].y);
-    //        // params_event->getTotalParams().baseParams.roiArea.ground.push_back(point2D);
-    //    }
-
-
 
     QList<QList<PointT>> area_lists;
 
@@ -499,17 +630,15 @@ void MainWindow::getAreaDatas()
 
     emit emit2dlists(area_lists);
 
+}
 
-//    auto tmp = this->paint_area->area[0].Area2D_point_T;
-
-//    std::cout << " this->paint_area->area[0].Area2D_point_T" << this->paint_area->area[0].Area2D_point_T.size() << std::endl;
-//    std::cout << " tmp.size()" << tmp.size() << std::endl;
-//    for (int j = 0; j < tmp.size(); j++)
-//    {
-//        std::cout << "tmp[j].x:" << tmp[j].x << " tmp[j].y :" << tmp[j].y << std::endl;
-//        // cv::Point2d point2D(tmp[j].x, tmp[j].y);
-//        // params_event->getTotalParams().baseParams.roiArea.ground.push_back(point2D);
-//    }
+void MainWindow::setAreaDatas(QList<QList<PointT>> msg)
+{
+    std::cout<<"setAreaDatas"<<std::endl;
+    for(int i{0};msg.size()>i;i++)
+    {
+        this->paint_area->area[i].Area2D_point_T = msg[i];
+    }
 }
 
 

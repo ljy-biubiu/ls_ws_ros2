@@ -26,6 +26,7 @@
 #include "sys_msgs/msg/point.hpp"
 #include "sys_msgs/msg/point_array.hpp"
 #include "sys_msgs/msg/to_d_area.hpp"
+#include <std_msgs/msg/int8_multi_array.hpp>
 
 #include <QLabel>
 #include <QImage>
@@ -94,6 +95,7 @@ private:
     void log_event(const QMultiMap<QString, QString> &msg);
     void log_callback(const std_msgs::msg::String::SharedPtr &msg);
     void decct_data_callback(const sys_msgs::msg::DectData::SharedPtr &msg);
+    void to_d_area_Callback(const sys_msgs::msg::ToDArea::SharedPtr &msg);
 
 protected:
     void run() override;
@@ -105,6 +107,7 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr lidar_drive_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr log_sub;
     rclcpp::Subscription<sys_msgs::msg::DectData>::SharedPtr algorithm_data_sub;
+    rclcpp::Subscription<sys_msgs::msg::ToDArea>::SharedPtr to_d_area_sub;
 
     // 发布
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr parameter_server_pub_;
@@ -112,6 +115,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr log_pub_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr heart_keeper_pub_;
     rclcpp::Publisher<sys_msgs::msg::ToDArea>::SharedPtr to_d_area_pub_;
+    rclcpp::Publisher<std_msgs::msg::Int8MultiArray>::SharedPtr save_point_cloud_pub_;
 
 
     // 定时器
@@ -128,11 +132,14 @@ signals:
     void emit_lidar_drive(PointCloudTPtr);
     void emit_show_log(QString);
     void emit_decct_data(DectData);
+    void ros_to_qt_area_points(QList<QList<PointT>>);
 
 private slots:
     void saveTopicParams(QString);
     void saveLog(QMultiMap<QString, QString>);
     void saveLidarDatas(QString);
     void save2dlists(QList<QList<PointT>>);
+    void save_point_cloud(int);
+    void save_point_backgroud_cloud(int);
 };
 #endif

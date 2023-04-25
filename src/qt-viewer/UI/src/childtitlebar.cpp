@@ -15,6 +15,12 @@ ChildTitleBar::ChildTitleBar(QWidget *parent) :
     ui->labelTitleName->setAlignment(Qt::AlignCenter);
     ui->labelTitleName->setStyleSheet("font-size:12pt; color:#ffffff;");
     ui->labelTitleName->setText(PRODUCT_NAME);
+
+    //设置背景黑色
+    QPalette palBackGround(this->palette());
+    palBackGround.setColor(QPalette::Background, QColor(34, 34, 34));
+//    ui->label_6->setAutoFillBackground(true);
+//    ui->label_6->setPalette(palBackGround);
 }
 
 ChildTitleBar::~ChildTitleBar()

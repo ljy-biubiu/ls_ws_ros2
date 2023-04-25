@@ -63,6 +63,13 @@ private:
     QLineEdit* LM_line_m_grid_z ;
     QLineEdit* LM_line_resolution ;
     QLineEdit* LM_line_start_dist ;
+    QLineEdit* LM_line_cloudMapFrame;
+    QRadioButton* RB_line_save_bclold_isOpen;
+    QLineEdit* LM_line_save_bclold_hour;
+    QLineEdit* LM_line_save_bclold_min;
+    QLineEdit* LM_line_roi_limit;
+    QLineEdit* LM_line_detect_text_size;
+
 
     QLineEdit* LM_line_edit_Tolerance ;
     QLineEdit* LM_line_edit_maxSize ;
