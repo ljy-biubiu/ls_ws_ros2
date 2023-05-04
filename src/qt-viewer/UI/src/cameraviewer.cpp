@@ -8,45 +8,16 @@ CameraViewer::CameraViewer(QWidget *parent) :
     ui(new Ui::CameraViewer)
 {
     ui->setupUi(this);
-
     my_label = new QLabel(this);
-
-    my_widget = new QWidget(this);
-    my_image = new QImage();
-
-    //ui->my_label2->setGeometry(0,0,1200,900);
-
-
-
-
-
-//    my_label = new QLabel("圖片",this);
-    //ui->my_label2->setFrameShape(QFrame::Box);
-
-
-    //     QDesktopWidget *screenResolution = QApplication::desktop();
-    //     int appWindowWidth = this->geometry().width();
-    //     int appWindowHeight = this->geometry().height();
-
-    //     int center_y = screenResolution->height() * (3/16) - appWindowHeight/2;
-    //     int center_x = screenResolution->width() * (3/16) - appWindowWidth/2;
-    //     //此处的Width,Height不要被修改了(例如除以2了)
-    //    //不然看起来不是居中的
-    //     setGeometry(center_x, center_y,
-    //                 appWindowWidth,appWindowHeight);
-
-
-    //    my_widget = new QWidget(this);
-    //    this->ui->my_layout->addWidget(my_widget);
-    //    //设置背景黑色
-    //    QPalette palBackGround(this->palette());
-    //    palBackGround.setColor(QPalette::Background, QColor(74, 74, 74));
-    //    this->setAutoFillBackground(true);
-    //    this->setPalette(palBackGround);
-    //    this->setStyleSheet("background-color:rgb(74, 74, 74)");
-
-
-
+    ui->verticalLayout_2->addWidget(my_label);
+//    this->show_widget;
+//    ui->show_widget->
+//    setStyleSheet( "QWidget{ background-color : rgba( 160, 160, 160, 255); border-radius : 7px;  }" );
+//    QLabel *label = new QLabel(this);
+//    QHBoxLayout *layout = new QHBoxLayout();
+//    label->setText("Random String");
+//    layout->addWidget(label);
+//    setLayout(layout);
 }
 
 
@@ -84,15 +55,16 @@ QImage CameraViewer::MatToQImage(cv::Mat &mtx)
 
 void CameraViewer::setCameraMat(cv::Mat &msg)
 {
-    //ui->my_label2->autoFillBackground();
-    QImage image_tmp = MatToQImage(msg);
-    image_tmp = image_tmp.scaled(ui->my_label2->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-    ui->my_label2->setPixmap(QPixmap::fromImage(image_tmp));
+//    //ui->my_label2->autoFillBackground();
+//    QImage image_tmp = MatToQImage(msg);
+//    image_tmp = image_tmp.scaled(my_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+//    my_label->setPixmap(QPixmap::fromImage(image_tmp));
 }
 
 void CameraViewer::setCameraMat(QPixmap msg)
 {
-    ui->my_label2->setPixmap(msg);
+//    msg.scaled(600,300);
+    my_label->setPixmap(msg.scaled(600,300)); //16/9
 }
 
 CameraViewer::~CameraViewer()

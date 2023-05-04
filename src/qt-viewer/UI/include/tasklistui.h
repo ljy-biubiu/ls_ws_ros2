@@ -37,15 +37,6 @@ private:
     QComboBox* creteQComboBoxEditItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,const QString &info,const QStringList &list);
 
 private:
-    //    QVector<QLineEdit*> vec_line_edit_ip;
-    //    QVector<QLineEdit*> vec_line_edit_port;
-    //    QVector<QLineEdit*> vec_LM_line_edit_x;
-    //    QVector<QLineEdit*> vec_LM_line_edit_y;
-    //    QVector<QLineEdit*> vec_LM_line_edit_z;
-    //    QVector<QLineEdit*> vec_LM_line_edit_picth;
-    //    QVector<QLineEdit*> vec_LM_line_edit_roll;
-    //    QVector<QLineEdit*> vec_LM_line_edit_yaw;
-    //    QVector<QVector<QLineEdit*>> vec_lidar_datas;
 
 
     QLineEdit* LM_line_edit_ServerAddress ;
@@ -64,7 +55,7 @@ private:
     QLineEdit* LM_line_resolution ;
     QLineEdit* LM_line_start_dist ;
     QLineEdit* LM_line_cloudMapFrame;
-    QRadioButton* RB_line_save_bclold_isOpen;
+    QCheckBox* RB_line_save_bclold_isOpen;
     QLineEdit* LM_line_save_bclold_hour;
     QLineEdit* LM_line_save_bclold_min;
     QLineEdit* LM_line_roi_limit;
@@ -95,10 +86,16 @@ private:
     QLineEdit* LM_line_edit_info_topic;
     QLineEdit* LM_line_edit_status_topic;
 
-
     QPushButton * comfire_button;
     QTreeWidgetItem * buttonItem;
     QVector<QLineEdit*> vec_LM_line_edit_sum;
+
+public:
+    QCheckBox* RB_line_show_is_open;
+    QCheckBox* RB_line_show_classify;
+    QCheckBox* RB_line_show_distance;
+    QCheckBox* RB_line_show_velocity;
+    QLineEdit* LM_line_show_box_size;
 
 signals:
     void sigSavePushButton(QString);

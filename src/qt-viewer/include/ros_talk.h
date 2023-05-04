@@ -10,6 +10,7 @@
 #include <jsoncpp/json/json.h>
 #include <pwd.h>
 #include <vector>
+#include "common_ui_type.h"
 
 #include <QObject>
 #include <QThread>
@@ -26,6 +27,7 @@
 #include "sys_msgs/msg/point.hpp"
 #include "sys_msgs/msg/point_array.hpp"
 #include "sys_msgs/msg/to_d_area.hpp"
+#include "sys_msgs/msg/general_table_array.hpp"
 #include <std_msgs/msg/int8_multi_array.hpp>
 
 #include <QLabel>
@@ -34,10 +36,6 @@
 #include <opencv2/core/core.hpp>
 #include "cv_bridge/cv_bridge.h"
 #include <pcl_conversions/pcl_conversions.h>
-
-typedef pcl::PointXYZRGBA PointT;
-typedef pcl::PointCloud<PointT> PointCloudT;
-typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
 
 struct SendObjectInf
 {
@@ -73,7 +71,7 @@ struct DectData
     }
 };
 
-Q_DECLARE_METATYPE(DectData)             //要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
+Q_DECLARE_METATYPE(DectData) // 要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
 
 class RosTalk : public QThread
 {
@@ -96,6 +94,8 @@ private:
     void log_callback(const std_msgs::msg::String::SharedPtr &msg);
     void decct_data_callback(const sys_msgs::msg::DectData::SharedPtr &msg);
     void to_d_area_Callback(const sys_msgs::msg::ToDArea::SharedPtr &msg);
+    void monitor_node_callback(const sys_msgs::msg::GeneralTableArray::SharedPtr &msg);
+    void monitor_sensor_callback(const sys_msgs::msg::GeneralTableArray::SharedPtr &msg);
 
 protected:
     void run() override;
@@ -108,6 +108,8 @@ private:
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr log_sub;
     rclcpp::Subscription<sys_msgs::msg::DectData>::SharedPtr algorithm_data_sub;
     rclcpp::Subscription<sys_msgs::msg::ToDArea>::SharedPtr to_d_area_sub;
+    rclcpp::Subscription<sys_msgs::msg::GeneralTableArray>::SharedPtr monitor_node_sub_;
+    rclcpp::Subscription<sys_msgs::msg::GeneralTableArray>::SharedPtr monitor_sensor_sub_;
 
     // 发布
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr parameter_server_pub_;
@@ -116,7 +118,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr heart_keeper_pub_;
     rclcpp::Publisher<sys_msgs::msg::ToDArea>::SharedPtr to_d_area_pub_;
     rclcpp::Publisher<std_msgs::msg::Int8MultiArray>::SharedPtr save_point_cloud_pub_;
-
+    // rclcpp::Publisher<sys_msgs::msg::GeneralTableArray>::SharedPtr save_point_cloud_pub_;
 
     // 定时器
     rclcpp::TimerBase::SharedPtr timer_;
@@ -125,6 +127,7 @@ private:
     Json::Value parameter_server_;
 
     std::shared_ptr<rclcpp::Node> node;
+    AlarmStatus alarm_status;
 
 signals:
     void emitTopicParams(QString);
@@ -132,6 +135,7 @@ signals:
     void emit_lidar_drive(PointCloudTPtr);
     void emit_show_log(QString);
     void emit_decct_data(DectData);
+    void emit_alarm_data(AlarmStatus);
     void ros_to_qt_area_points(QList<QList<PointT>>);
 
 private slots:

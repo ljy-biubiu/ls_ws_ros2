@@ -21,6 +21,67 @@ typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
 
+
+/*************ALARM UI*****************/
+
+union SystemStatus {
+    uint8_t data{255};
+    struct {
+        uint8_t localizer: 1; // 1:已定位 0： 未定位
+        uint8_t unused1: 1;
+        uint8_t unused2: 1;
+        uint8_t unused3: 1;
+        uint8_t unused4: 1;
+        uint8_t unused5: 1;
+        uint8_t unused6: 1;
+        uint8_t unused7: 1;
+    } bits;
+};
+
+union WorkStatus {
+    uint8_t data{255};
+    struct {
+        uint8_t localizer: 1; // 1:已定位 0： 未定位
+        uint8_t unused1: 1;
+        uint8_t unused2: 1;
+        uint8_t unused3: 1;
+        uint8_t unused4: 1;
+        uint8_t unused5: 1;
+        uint8_t unused6: 1;
+        uint8_t unused7: 1;
+    } bits;
+};
+
+union CommunicateStatus {
+    uint8_t data{255};
+    struct {
+        uint8_t camera: 1; // 1:已定位 0： 未定位
+        uint8_t lidar_drive: 1;
+        uint8_t plc: 1;
+        uint8_t unused3: 1;
+        uint8_t unused4: 1;
+        uint8_t unused5: 1;
+        uint8_t unused6: 1;
+        uint8_t unused7: 1;
+    } bits;
+};
+
+struct AlarmStatus {
+    SystemStatus system_status;
+    WorkStatus work_status;
+    CommunicateStatus communicate_status;
+};
+
+struct LEDSTATUS
+{
+    int communicion_led_color[2]= {5,5};
+    int work_led_color[2]= {5,5};
+    int system_led_color[2]= {5,5};
+    int other_led_color[2]= {5,5};
+};
+/*************ALARM UI*****************/
+
+
 struct war
 {
     pcl::PointXYZ point;

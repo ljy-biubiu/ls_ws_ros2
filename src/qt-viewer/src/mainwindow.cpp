@@ -6,6 +6,7 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     qRegisterMetaType<PointCloudTPtr>("PointCloudTPtr");
     qRegisterMetaType<DectData>("DectData");
     qRegisterMetaType<QList<QList<PointT>>>("QList<QList<PointT>>");
+    qRegisterMetaType<AlarmStatus>("AlarmStatus");
 
     setWindowTitle(tr("PortMonitor"));
 
@@ -75,12 +76,11 @@ void MainWindow::mainEventCallback()
     my_timer = new QTimer(this);
     my_timer->start(100);
     connect(my_timer, &QTimer::timeout, [=]()
-    {
+            {
         if(paint_area != nullptr && setROI != nullptr)
         {
             paint_area_2setROI();
         } });
-
 }
 
 void MainWindow::paint_area_2setROI()
@@ -96,8 +96,6 @@ void MainWindow::paint_area_2setROI()
     }
     setROI->showPoint();
 }
-
-
 
 void MainWindow::updateCameraImage()
 {
@@ -202,23 +200,55 @@ void MainWindow::show_dect_data(DectData msg)
             classify_name = "people";
             break;
         default:
+            classify_name = "none";
             break;
         }
-        sum_text = "classify : " + classify_name + "\nspeed : " + std::to_string(dat.speed);
-        this->viewer->addText3D(sum_text, linesLCenterPoint, 0.1, 1.0, 1.0, 1.0, "line1Text3D_" + std::to_string(i));
+
+        auto trimDecimal = [=](std::string str)
+        {
+            size_t dot_pos = str.find(".");
+            if (dot_pos != std::string::npos && dot_pos < str.size() - 3)
+            {
+                str = str.substr(0, dot_pos + 3);
+            }
+            return str;
+        };
+
+        if (task_list_ui->RB_line_show_distance->isChecked())
+        {
+            sum_text = sum_text + trimDecimal(std::to_string(dat.distance)) + "\n";
+        }
+
+        if (task_list_ui->RB_line_show_classify->isChecked())
+        {
+            sum_text = sum_text + "classify : " + classify_name + "\n";
+        }
+
+        if (task_list_ui->RB_line_show_velocity->isChecked())
+        {
+            sum_text = sum_text + "speed : " + trimDecimal(std::to_string(dat.speed)) + "\n";
+        }
+
+        if (!task_list_ui->RB_line_show_is_open->isChecked())
+        {
+            sum_text = std::string();
+        }
+
+        this->viewer->addText3D(sum_text, linesLCenterPoint,
+                                std::stod(task_list_ui->LM_line_show_box_size->text().toStdString() == std::string() ? std::string("1") : task_list_ui->LM_line_show_box_size->text().toStdString()),
+                                1, 1, 0, "line1Text3D_" + std::to_string(i));
         this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.4, cube);
         i++;
     }
 
-
-    //2D paint
+    // 2D paint
     vector<vector<PointT>> areaPoints;
-    for(int i{0};3>i;i++)
+    for (int i{0}; 3 > i; i++)
     {
         vector<PointT> linePoints;
         //        Point.x = this->paint_area->area[i].Area2D_point_T.x;
         //        LinePoints.push_back(this->paint_area->area[i].Area2D_point_T);
-        for(int j{0};this->paint_area->area[i].Area2D_point_T.size()>j;j++)
+        for (int j{0}; this->paint_area->area[i].Area2D_point_T.size() > j; j++)
         {
             PointT point;
             point.x = this->paint_area->area[i].Area2D_point_T[j].x;
@@ -229,17 +259,16 @@ void MainWindow::show_dect_data(DectData msg)
         areaPoints.push_back(linePoints);
     }
 
-    for(int i{0};areaPoints.size()>i;i++)
+    for (int i{0}; areaPoints.size() > i; i++)
     {
-        if(this->paint_area->area[i].Area2D_point_T.size()<2)
+        if (this->paint_area->area[i].Area2D_point_T.size() < 2)
             continue;
-        for(int j{0};areaPoints[i].size()-1>j;j++)
+        for (int j{0}; areaPoints[i].size() - 1 > j; j++)
         {
-            this->viewer->addLine(areaPoints[i][j],areaPoints[i][j+1], 1, 0, 0,"line:"+ to_string(i) + to_string(j));
-            this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "line:"+ to_string(i) + to_string(j));
+            this->viewer->addLine(areaPoints[i][j], areaPoints[i][j + 1], 1, 0, 0, "line:" + to_string(i) + to_string(j));
+            this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "line:" + to_string(i) + to_string(j));
         }
     }
-
 
     this->viewer->getRenderWindow()->GetRenderers()->GetFirstRenderer()->Render();
     this->viewer->getRenderWindow()->Render();
@@ -304,7 +333,7 @@ void MainWindow::mainLayOut()
     this->paramsListLayout = new QVBoxLayout();
     this->vtkLayout = new QVBoxLayout();
     this->cameraLayout = new QVBoxLayout();
-    this->imageWidget_layout  = new QVBoxLayout(this);
+    this->imageWidget_layout = new QVBoxLayout();
 
     this->right_camera_widget = new QWidget();
     this->right_data_widget = new QWidget();
@@ -370,7 +399,6 @@ void MainWindow::mainLayOut()
     right_data_layout->setStretchFactor(diary, 7);
     right_data_layout->setStretchFactor(alarm, 5);
 
-    //    right_body_layout->addWidget(camera_viewer);
     right_body_layout->addLayout(right_camera_layout);
     right_body_layout->addLayout(right_data_layout);
     right_body_layout->addLayout(right_table_layout);
@@ -394,13 +422,12 @@ void MainWindow::mainLayOut()
     //    left_body_layout->setStretchFactor(imageWidget_layout, 9);
     // left_body_layout->addWidget(camera_viewer);
 
-
-    for (int i = 0; i < paramsListLayout->count(); ++i) {
-        QWidget* w = paramsListLayout->itemAt(i)->widget();
+    for (int i = 0; i < paramsListLayout->count(); ++i)
+    {
+        QWidget *w = paramsListLayout->itemAt(i)->widget();
         if (w != NULL)
             w->setVisible(false);
     }
-
 }
 
 /*删除layout*/
@@ -445,8 +472,7 @@ void MainWindow::initMenu()
     lidar_area_set = new QAction(tr("&Areas"), this);
 
     save_point_cloud = new QAction(tr("&saveCloud"), this);
-    svae_background_pont_cloud =new QAction(tr("&saveBCloud"), this);
-
+    svae_background_pont_cloud = new QAction(tr("&saveBCloud"), this);
 
     connect(view_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode_Action()));
     connect(view1_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode1_Action()));
@@ -456,7 +482,6 @@ void MainWindow::initMenu()
     connect(save_point_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_cloud_set_Action()));
     connect(svae_background_pont_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_backgourd_cloud_set_Action()));
 }
-
 
 void MainWindow::initToolBar()
 {
@@ -482,8 +507,6 @@ void MainWindow::initToolBar()
     fileToolBar->addAction(save_point_cloud);
     fileToolBar->addAction(svae_background_pont_cloud);
 
-
-
     // addToolBar(Qt::LeftToolBarArea,fileToolBar);
     addToolBar(Qt::BottomToolBarArea, fileToolBar);
     //    static QMenu *fileMenu = menuBar()->addMenu ( tr ( "&File" ) );
@@ -492,6 +515,8 @@ void MainWindow::initToolBar()
     //    addToolBarBreak(Qt::BottomToolBarArea);
     //    addToolBar(Qt::BottomToolBarArea, toolBar);
 }
+
+// void emit_alarm_data(AlarmStatus);
 
 void MainWindow::initConnect()
 {
@@ -512,7 +537,9 @@ void MainWindow::initConnect()
 
     QObject::connect(this, SIGNAL(emit_save_point_cloud(int)), ros_talk, SLOT(save_point_cloud(int)));
     QObject::connect(this, SIGNAL(emit_save_point_backgourd_cloud(int)), ros_talk, SLOT(save_point_backgroud_cloud(int)));
+    QObject::connect(ros_talk, SIGNAL(emit_alarm_data(AlarmStatus)), alarm, SLOT(setLEDStatus(AlarmStatus)));
 
+    // void setLEDStatus( const AlarmStatus& msg  );
     //    setAreaDatas(QList<QList<PointT>> msg);
 }
 
@@ -520,22 +547,20 @@ void MainWindow::createActions()
 {
 }
 
-
-
 void MainWindow::save_point_backgourd_cloud_set_Action()
 {
-    //QMessageBox mb(QMessageBox::NoIcon,"提示","按一下",QMessageBox::Yes|QMessageBox::No,&w);
+    // QMessageBox mb(QMessageBox::NoIcon,"提示","按一下",QMessageBox::Yes|QMessageBox::No,&w);
     QMessageBox mb(this);
     mb.setWindowTitle("提示");
     mb.setText("是否保存当前背景点云");
-    /*QPushButton *but1=*/mb.addButton("是",QMessageBox ::AcceptRole);
-    /*QPushButton *but2=*/mb.addButton("否",QMessageBox ::RejectRole);
+    /*QPushButton *but1=*/mb.addButton("是", QMessageBox ::AcceptRole);
+    /*QPushButton *but2=*/mb.addButton("否", QMessageBox ::RejectRole);
     mb.show();
-    switch(mb.exec())
+    switch (mb.exec())
 
     {
     case QMessageBox::AcceptRole:
-        QMessageBox::information(this,"提示","");//默认是模态的
+        QMessageBox::information(this, "提示", ""); // 默认是模态的
         emit emit_save_point_backgourd_cloud(1);
         break;
         //    case QMessageBox::RejectRole:
@@ -544,21 +569,20 @@ void MainWindow::save_point_backgourd_cloud_set_Action()
     }
 }
 
-
 void MainWindow::save_point_cloud_set_Action()
 {
-    //QMessageBox mb(QMessageBox::NoIcon,"提示","按一下",QMessageBox::Yes|QMessageBox::No,&w);
+    // QMessageBox mb(QMessageBox::NoIcon,"提示","按一下",QMessageBox::Yes|QMessageBox::No,&w);
     QMessageBox mb(this);
     mb.setWindowTitle("提示");
     mb.setText("是否保存当前点云");
-    /*QPushButton *but1=*/mb.addButton("是",QMessageBox ::AcceptRole);
-    /*QPushButton *but2=*/mb.addButton("否",QMessageBox ::RejectRole);
+    /*QPushButton *but1=*/mb.addButton("是", QMessageBox ::AcceptRole);
+    /*QPushButton *but2=*/mb.addButton("否", QMessageBox ::RejectRole);
     mb.show();
-    switch(mb.exec())
+    switch (mb.exec())
 
     {
     case QMessageBox::AcceptRole:
-        QMessageBox::information(this,"提示","");//默认是模态的
+        QMessageBox::information(this, "提示", ""); // 默认是模态的
         emit emit_save_point_cloud(1);
         break;
         //    case QMessageBox::RejectRole:
@@ -571,13 +595,13 @@ void MainWindow::param_set_Action()
 {
     //    this->add_lidar->show();
     //    task_list_ui->show();
-    for (int i = 0; i < paramsListLayout->count(); ++i) {
-        QWidget* w = paramsListLayout->itemAt(i)->widget();
+    for (int i = 0; i < paramsListLayout->count(); ++i)
+    {
+        QWidget *w = paramsListLayout->itemAt(i)->widget();
         if (w != NULL)
             w->setVisible(true);
     }
 }
-
 
 void MainWindow::lidar_area_set_Action()
 {
@@ -623,25 +647,22 @@ void MainWindow::getAreaDatas()
 
     QList<QList<PointT>> area_lists;
 
-    for(int i{0};3>i;i++)
+    for (int i{0}; 3 > i; i++)
     {
         area_lists.push_back(this->paint_area->area[i].Area2D_point_T);
     }
 
     emit emit2dlists(area_lists);
-
 }
 
 void MainWindow::setAreaDatas(QList<QList<PointT>> msg)
 {
-    std::cout<<"setAreaDatas"<<std::endl;
-    for(int i{0};msg.size()>i;i++)
+    std::cout << "setAreaDatas" << std::endl;
+    for (int i{0}; msg.size() > i; i++)
     {
         this->paint_area->area[i].Area2D_point_T = msg[i];
     }
 }
-
-
 
 void MainWindow::params_set(QString msg)
 {

@@ -69,6 +69,10 @@
         "variant": "cpp",
         "*.inc": "cpp",
         "hash_map": "cpp",
-        "*.msg": "cpp"
+        "*.msg": "cpp",
+        "any": "cpp",
+        "forward_list": "cpp",
+        "shared_mutex": "cpp",
+        "valarray": "cpp"
     }
 }

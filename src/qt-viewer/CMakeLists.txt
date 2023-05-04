@@ -44,6 +44,7 @@ set(UI_FILES ./UI/src/smsdialog.ui ./UI/src/aboutdialog.ui  ./UI/src/alarm.ui ./
         ./UI/src/addpolygon.ui ./UI/src/cameraviewer.ui ./UI/src/childtitlebar.ui
          ./UI/src/maintitlebar.ui ./UI/src/setroi.ui ./UI/src/webui.ui ./UI/src/addlidar.ui )
 
+         
 # find dependencies
  find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
@@ -86,6 +87,7 @@ add_executable(${PROJECT_NAME}_node
         ${SRC_LIST}
         ${OTHER_SRCS}
 )
+
 
 target_include_directories(${PROJECT_NAME}_node PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"

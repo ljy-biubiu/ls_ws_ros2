@@ -110,6 +110,37 @@ TaskListUi::TaskListUi(QWidget *parent)
 
     }
 
+    //显示设置
+    QTreeWidgetItem *showParams = new QTreeWidgetItem();
+    mainTreeWidget->addTopLevelItem(showParams);
+    showParams->setText(0, QString("显示参数"));
+
+    for (int i = 0; i < 1; i++)
+    {
+        QTreeWidgetItem *showParams_1 = new QTreeWidgetItem();
+        showParams->addChild(showParams_1); ///
+        showParams_1->setText(0, QString(" 检测显示 "));
+
+        RB_line_show_is_open = new QCheckBox(this);
+        RB_line_show_classify = new QCheckBox(this);
+        RB_line_show_distance = new QCheckBox(this);
+        RB_line_show_velocity = new QCheckBox(this);
+        LM_line_show_box_size = new QLineEdit(this);
+
+        RB_line_show_is_open->setChecked(true);
+        RB_line_show_distance->setChecked(true);
+        LM_line_show_box_size->setText("1");
+
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_is_open, "is_show_open");
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_classify, "is_show_classify");
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_distance, "is_show_distance");
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_velocity, "is_show_velocit");
+        getQLineEditItem(mainTreeWidget, showParams_1, LM_line_show_box_size, "show_box_size");
+
+    }
+
+
+
     //检测配置
     QTreeWidgetItem *detectorParams = new QTreeWidgetItem();
     mainTreeWidget->addTopLevelItem(detectorParams);
@@ -147,7 +178,7 @@ TaskListUi::TaskListUi(QWidget *parent)
         LM_line_start_dist = new QLineEdit(this);
 
         LM_line_cloudMapFrame = new QLineEdit(this);
-        RB_line_save_bclold_isOpen = new QRadioButton(this);
+        RB_line_save_bclold_isOpen = new QCheckBox(this);
         LM_line_save_bclold_hour = new QLineEdit(this);
         LM_line_save_bclold_min = new QLineEdit(this);
         LM_line_roi_limit = new QLineEdit(this);
@@ -164,7 +195,7 @@ TaskListUi::TaskListUi(QWidget *parent)
         getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_resolution, "resolution");
         getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_start_dist, "start_dist");
         getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_cloudMapFrame, "cloudMapFrame");
-        getQRadiobuttonItem(mainTreeWidget, preprocessorParams, RB_line_save_bclold_isOpen, "save_bclold_isOpen");
+        getQCheckBoxItem(mainTreeWidget, preprocessorParams, RB_line_save_bclold_isOpen, "save_bclold_isOpen");
         getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_save_bclold_hour, "save_bclold_hour");
         getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_save_bclold_min, "save_bclold_min");
         getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_roi_limit, "roi_limit");
@@ -219,138 +250,7 @@ TaskListUi::TaskListUi(QWidget *parent)
     }
 
 
-    //    QTreeWidgetItemIterator It(mainTreeWidget);
-    //    while(*It)
-    //    {
-    //        qDebug() << (*It)->text(0);
-    //        It++;
-    //    }
 
-
-    //    int p{0};
-    //    int w{0};
-    //    for( auto child :  mainTreeWidget->children())
-    //    {
-    //        w++;
-    //        qDebug()<<"================================="<<w;
-    //        for(auto dat : child->children())
-    //        {
-    //            p++;
-    //            qDebug()<<"================================="<<p;
-    ////            qDebug()<<dat->;
-    //        }
-    //    }
-    ////    for()
-
-
-
-
-    //    //    QTreeWidgetItem *lidarParams=new QTreeWidgetItem();
-    //    //    mainTreeWidget->addTopLevelItem(lidarParams);
-    //    //    lidarParams->setText(0,QString("雷达参数"));
-
-    //    //mode
-    //    QTreeWidgetItem *Mode=new QTreeWidgetItem();
-    //    //Mode->setIcon(0,QIcon(":/res/images/param-mode.png"));
-    //    mainTreeWidget->addTopLevelItem(Mode);
-    //    Mode->setText(0,QString("类型"));
-
-    //    auto combo_box = new QComboBox(this);
-    //    auto spin_box = new QSpinBox(this);
-
-    //    getQComboBoxItem(mainTreeWidget,Mode,combo_box,"类型:");
-    //    getQSpinBoxItem(mainTreeWidget,Mode,spin_box,"数量:");
-
-    //    //vmap-param
-    //    QTreeWidgetItem *Point=new QTreeWidgetItem();
-    //    //Point->setIcon(0,QIcon(":/res/images/Point.png"));
-    //    mainTreeWidget->addTopLevelItem(Point);
-    //    Point->setText(0,QString("点"));
-
-    //    auto line_edit = new QLineEdit(this);
-    //    auto line_edit2 = new QLineEdit(this);
-    //    auto line_edit3 = new QLineEdit(this);
-    //    auto line_edit4 = new QLineEdit(this);
-    //    auto line_edit5 = new QLineEdit(this);
-    //    auto line_edit6 = new QLineEdit(this);
-
-    //    getQLineEditItem(mainTreeWidget,Point,line_edit,"x:");
-    //    getQLineEditItem(mainTreeWidget,Point,line_edit2,"y:");
-    //    getQLineEditItem(mainTreeWidget,Point,line_edit3,"z:");
-    //    getQLineEditItem(mainTreeWidget,Point,line_edit4,"w-dir:");
-    //    getQLineEditItem(mainTreeWidget,Point,line_edit5,"lat:");
-    //    getQLineEditItem(mainTreeWidget,Point,line_edit6,"lon:");
-
-    //    //point-type
-    //    QTreeWidgetItem *Point_type=new QTreeWidgetItem();
-    //    //Point_type->setIcon(0,QIcon(":/res/images/type.png"));
-    //    mainTreeWidget->addTopLevelItem(Point_type);
-    //    Point_type->setText(0,QString("属性"));
-
-    //    auto combo_box3 = new QComboBox(this);
-    //    auto combo_box4 = new QComboBox(this);
-    //    auto combo_box5 = new QComboBox(this);
-    //    auto combo_box6 = new QComboBox(this);
-    //    auto combo_box7 = new QComboBox(this);
-    //    auto combo_box8 = new QComboBox(this);
-    //    auto combo_box9 = new QComboBox(this);
-    //    auto combo_box10 = new QComboBox(this);
-
-    //    getQComboBoxItem(mainTreeWidget,Point_type,combo_box3,"道路:");
-    //    getQComboBoxItem(mainTreeWidget,Point_type,combo_box4,"场景:");
-    //    getQComboBoxItem(mainTreeWidget,Point_type,combo_box5,"避障:");
-    //    getQComboBoxItem(mainTreeWidget,Point_type,combo_box6,"方向:");
-    //    getQComboBoxItem(mainTreeWidget,Point_type,combo_box7,"宽窄:");
-    //    getQComboBoxItem(mainTreeWidget,Point_type,combo_box8,"坡度:");
-    //    getQComboBoxItem(mainTreeWidget,Point_type,combo_box9,"室内外:");
-
-    //    //parameter
-    //    QTreeWidgetItem *Parameter=new QTreeWidgetItem();
-    //    //Parameter->setIcon(0,QIcon(":/res/images/Link.png"));
-    //    mainTreeWidget->addTopLevelItem(Parameter);
-    //    Parameter->setText(0,QString("参数"));
-
-    //    auto line_edit7 = new QLineEdit(this);
-    //    //auto line_edit8 = new QLineEdit(this);
-    //    auto line_edit9 = new QLineEdit(this);
-    //    auto line_edit10 = new QLineEdit(this);
-
-    //    getQLineEditItem(mainTreeWidget,Parameter,line_edit7,"限速/编号:");
-    //    getQComboBoxItem(mainTreeWidget,Parameter,combo_box10,"链接:");
-    //    getQLineEditItem(mainTreeWidget,Parameter,line_edit9,"链接号:");
-    //    getQLineEditItem(mainTreeWidget,Parameter,line_edit10,"laneletid/楼层:");
-
-    //    //info
-    //    QTreeWidgetItem *infomessage=new QTreeWidgetItem();
-    //    //infomessage->setIcon(0,QIcon(":/res/images/infomessage.png"));
-    //    mainTreeWidget->addTopLevelItem(infomessage);
-    //    infomessage->setText(0,QString("信息"));
-
-    //    auto my_label = new QLabel(this);
-    //    auto my_label2 = new QLabel(this);
-
-    //    getQLabelItem(mainTreeWidget,infomessage,my_label,"vmap总数:");
-    //    getQLabelItem(mainTreeWidget,infomessage,my_label2,"lanelet2总数:");
-
-    //    //pcd-z
-    //    // QTreeWidgetItem *Point_z=new QTreeWidgetItem();
-    //    // Point_z->setIcon(0,QIcon(":/res/images/Point.png"));
-    //    // mainTreeWidget->addTopLevelItem(Point_z);
-    //    // Point_z->setText(0,QString("高度"));
-
-    //    // getQLineEditItem(mainTreeWidget,Point_z,mainwindow_->pcdzmax_edit,"z-max:");
-    //    // getQLineEditItem(mainTreeWidget,Point_z,mainwindow_->pcdzmin_edit,"z-min:");
-    //    // getQPushButtonItem(mainTreeWidget,Point_z,mainwindow->reload_pBtn,"刷新:");
-
-    //    //
-    //    QTreeWidgetItem *laneletInfo=new QTreeWidgetItem();
-    //    // laneletInfo->setIcon(0,QIcon(":/res/images/.png"));
-    //    mainTreeWidget->addTopLevelItem(laneletInfo);
-    //    laneletInfo->setText(0,QString("信息"));
-
-    //    auto line_edit11 = new QLineEdit(this);
-
-    //    getQLineEditItem(mainTreeWidget,laneletInfo,line_edit11,"规则ID:");
 
 
     //按钮
@@ -361,13 +261,29 @@ TaskListUi::TaskListUi(QWidget *parent)
     mainTreeWidget->expandAll();
     this->setMinimumWidth(400);
     this->setMaximumWidth(400);
-////        this->setWindowFlags(Qt::FramelessWindowHint);
+    ////        this->setWindowFlags(Qt::FramelessWindowHint);
 
     QObject::connect(this->comfire_button, &QPushButton::clicked, this, &TaskListUi::savePushButton);
 
     mainLayout_H->addWidget(comfire_button);
 
 }
+
+
+
+//try {
+//    bool success = reader->parse(jsonStr.c_str(), jsonStr.c_str() + jsonStr.size(), &root, nullptr);
+//    if (!success) {
+//        throw std::runtime_error("Failed to parse JSON");
+//    }
+//}
+//catch (const std::exception& e) {
+//    std::cerr << "Error: " << e.what() << std::endl;
+//    // 处理异常
+//}
+
+//std::string
+
 
 void TaskListUi::updateTopicParams(QString msg)
 {
@@ -392,6 +308,15 @@ void TaskListUi::updateTopicParams(QString msg)
     LM_line_edit_UplodaDeviceId->setText(QString::fromStdString( parameter_server["web"]["UplodaDeviceId"].asString()).left(15));
 
 
+    //show
+    RB_line_show_is_open->setChecked(std::stoi(parameter_server["show"]["is_show_open"].asString()));
+    RB_line_show_classify->setChecked(std::stoi( parameter_server["show"]["is_show_classify"].asString()));
+    RB_line_show_distance->setChecked(std::stoi( parameter_server["show"]["is_show_distance"].asString()));
+    RB_line_show_velocity->setChecked(std::stoi( parameter_server["show"]["is_show_velocit"].asString()));
+    LM_line_show_box_size->setText(QString::fromStdString( parameter_server["show"]["show_box_size"].asString()).left(15));
+
+
+
     //preprocessor
     LM_line_Area_height_down->setText(QString::fromStdString( parameter_server["preprocessor"]["Area_height_down"].asString()).left(8));
     LM_line_Area_height_top->setText(QString::fromStdString( parameter_server["preprocessor"]["Area_height_top"].asString()).left(8));
@@ -406,12 +331,12 @@ void TaskListUi::updateTopicParams(QString msg)
 
     LM_line_cloudMapFrame->setText(QString::fromStdString( parameter_server["preprocessor"]["cloudMapFrame"].asString()).left(8));
     RB_line_save_bclold_isOpen->setChecked(std::stoi(parameter_server["preprocessor"]["save_bclold_isOpen"].asString()));
-//    RB_line_save_bclold_isOpen->setText(QString::fromStdString( parameter_server["preprocessor"]["save_bclold_isOpen"].asString()).left(8));
+    //    RB_line_save_bclold_isOpen->setText(QString::fromStdString( parameter_server["preprocessor"]["save_bclold_isOpen"].asString()).left(8));
     LM_line_save_bclold_hour->setText(QString::fromStdString( parameter_server["preprocessor"]["save_bclold_hour"].asString()).left(8));
     LM_line_save_bclold_min->setText(QString::fromStdString( parameter_server["preprocessor"]["save_bclold_min"].asString()).left(8));
     LM_line_roi_limit->setText(QString::fromStdString( parameter_server["preprocessor"]["roi_limit"].asString()).left(8));
 
-//    LM_line_detect_text_size, "detect_text_size");
+    //    LM_line_detect_text_size, "detect_text_size");
 
 
     //Detector
@@ -439,19 +364,6 @@ void TaskListUi::updateTopicParams(QString msg)
 
 
 
-    //    for (int i = 0; i < 14; i++)
-    //    {
-    //        vec_lidar_datas[2][i]->setText(QString::fromStdString( parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["IP"].asString()));
-    //        vec_lidar_datas[3][i]->setText(QString::fromStdString(parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["Port"].asString()));
-
-    //        vec_lidar_datas[2][i]->setText(QString::fromStdString( parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["x"].asString()));
-    //        vec_lidar_datas[3][i]->setText(QString::fromStdString(parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["y"].asString()));
-    //        vec_lidar_datas[4][i]->setText(QString::fromStdString(parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["z"].asString()));
-    //        vec_lidar_datas[5][i]->setText(QString::fromStdString(parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["pitch"].asString()));
-    //        vec_lidar_datas[6][i]->setText(QString::fromStdString(parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["roll"].asString()));
-    //        vec_lidar_datas[7][i]->setText(QString::fromStdString(parameter_server["LidarParam"]["LidarParam" + std::to_string(i)]["yaw"].asString()));
-    //    }
-    //this->update();
 }
 
 void TaskListUi::savePushButton()
@@ -477,6 +389,17 @@ void TaskListUi::savePushButton()
     web["UploadDataAddress"] = Json::Value(LM_line_edit_UploadDataAddress->text().toStdString());
     web["UplodaDeviceId"] = Json::Value(LM_line_edit_UplodaDeviceId->text().toStdString());
     root["web"] = Json::Value(web);
+
+
+    //show
+    Json::Value show;
+    show["is_show_open"] = Json::Value(std::to_string( RB_line_show_is_open->isChecked()));
+    show["is_show_classify"] = Json::Value(std::to_string( RB_line_show_classify->isChecked()));
+    show["is_show_distance"] = Json::Value(std::to_string( RB_line_show_distance->isChecked()));
+    show["is_show_velocit"] = Json::Value(std::to_string( RB_line_show_velocity->isChecked()));
+    show["show_box_size"] = Json::Value(LM_line_show_box_size->text().toStdString());
+    root["show"] = Json::Value(show);
+
 
     Json::Value preprocessor;
     preprocessor["Area_height_down"] = Json::Value(LM_line_Area_height_down->text().toStdString());
@@ -527,36 +450,6 @@ void TaskListUi::savePushButton()
     QString final_data = QString::fromStdString( root.toStyledString() );
     emit sigSavePushButton(final_data);
 
-    //        dat->
-    //        json_dat["IP"] = Json::Value(dat->text().toStdString());
-    //        // 子节点挂到根节点上
-    //        LidarParams["LidarParam" + std::to_string(i)] = Json::Value(json_dat);
-
-    //    for (int i = 0; i < 14; i++)
-    //    {
-    //        // 子节点
-    //        Json::Value LidarParam1;
-    //        // 子节点属性
-    //        LidarParam1["IP"] = Json::Value(msg[0][i]->text().toStdString());
-    //        LidarParam1["Port"] = Json::Value(msg[1][i]->text().toStdString());
-    //        LidarParam1["x"] = Json::Value(msg[2][i]->text().toStdString());
-    //        LidarParam1["y"] = Json::Value(msg[3][i]->text().toStdString());
-    //        LidarParam1["z"] = Json::Value(msg[4][i]->text().toStdString());
-    //        LidarParam1["pitch"] = Json::Value(msg[5][i]->text().toStdString());
-    //        LidarParam1["roll"] = Json::Value(msg[6][i]->text().toStdString());
-    //        LidarParam1["yaw"] = Json::Value(msg[7][i]->text().toStdString());
-    //        // 子节点挂到根节点上
-    //        LidarParams["LidarParam" + std::to_string(i)] = Json::Value(LidarParam1);
-    //    }
-
-    //    root["LidarParam"] = Json::Value(LidarParams);
-
-    //    std_msgs::msg::String str;
-    //    str.data = root.toStyledString();
-
-
-    //    emit sigSavePushButton(vec_lidar_datas);
-    //    qDebug() << "==================================00000000000000";
 }
 
 void TaskListUi::getQRadiobuttonItem(QTreeWidget *&mainTreeWidget, QTreeWidgetItem *&mainItem, QRadioButton *&radiobutton, const QString &info)
@@ -654,3 +547,138 @@ QComboBox *TaskListUi::creteQComboBoxEditItem(QTreeWidget *&mainTreeWidget, QTre
     mainTreeWidget->setItemWidget(Item, 1, comboBox);
     return comboBox;
 }
+
+
+
+//    QTreeWidgetItemIterator It(mainTreeWidget);
+//    while(*It)
+//    {
+//        qDebug() << (*It)->text(0);
+//        It++;
+//    }
+
+
+//    int p{0};
+//    int w{0};
+//    for( auto child :  mainTreeWidget->children())
+//    {
+//        w++;
+//        qDebug()<<"================================="<<w;
+//        for(auto dat : child->children())
+//        {
+//            p++;
+//            qDebug()<<"================================="<<p;
+////            qDebug()<<dat->;
+//        }
+//    }
+////    for()
+
+
+
+
+//    //    QTreeWidgetItem *lidarParams=new QTreeWidgetItem();
+//    //    mainTreeWidget->addTopLevelItem(lidarParams);
+//    //    lidarParams->setText(0,QString("雷达参数"));
+
+//    //mode
+//    QTreeWidgetItem *Mode=new QTreeWidgetItem();
+//    //Mode->setIcon(0,QIcon(":/res/images/param-mode.png"));
+//    mainTreeWidget->addTopLevelItem(Mode);
+//    Mode->setText(0,QString("类型"));
+
+//    auto combo_box = new QComboBox(this);
+//    auto spin_box = new QSpinBox(this);
+
+//    getQComboBoxItem(mainTreeWidget,Mode,combo_box,"类型:");
+//    getQSpinBoxItem(mainTreeWidget,Mode,spin_box,"数量:");
+
+//    //vmap-param
+//    QTreeWidgetItem *Point=new QTreeWidgetItem();
+//    //Point->setIcon(0,QIcon(":/res/images/Point.png"));
+//    mainTreeWidget->addTopLevelItem(Point);
+//    Point->setText(0,QString("点"));
+
+//    auto line_edit = new QLineEdit(this);
+//    auto line_edit2 = new QLineEdit(this);
+//    auto line_edit3 = new QLineEdit(this);
+//    auto line_edit4 = new QLineEdit(this);
+//    auto line_edit5 = new QLineEdit(this);
+//    auto line_edit6 = new QLineEdit(this);
+
+//    getQLineEditItem(mainTreeWidget,Point,line_edit,"x:");
+//    getQLineEditItem(mainTreeWidget,Point,line_edit2,"y:");
+//    getQLineEditItem(mainTreeWidget,Point,line_edit3,"z:");
+//    getQLineEditItem(mainTreeWidget,Point,line_edit4,"w-dir:");
+//    getQLineEditItem(mainTreeWidget,Point,line_edit5,"lat:");
+//    getQLineEditItem(mainTreeWidget,Point,line_edit6,"lon:");
+
+//    //point-type
+//    QTreeWidgetItem *Point_type=new QTreeWidgetItem();
+//    //Point_type->setIcon(0,QIcon(":/res/images/type.png"));
+//    mainTreeWidget->addTopLevelItem(Point_type);
+//    Point_type->setText(0,QString("属性"));
+
+//    auto combo_box3 = new QComboBox(this);
+//    auto combo_box4 = new QComboBox(this);
+//    auto combo_box5 = new QComboBox(this);
+//    auto combo_box6 = new QComboBox(this);
+//    auto combo_box7 = new QComboBox(this);
+//    auto combo_box8 = new QComboBox(this);
+//    auto combo_box9 = new QComboBox(this);
+//    auto combo_box10 = new QComboBox(this);
+
+//    getQComboBoxItem(mainTreeWidget,Point_type,combo_box3,"道路:");
+//    getQComboBoxItem(mainTreeWidget,Point_type,combo_box4,"场景:");
+//    getQComboBoxItem(mainTreeWidget,Point_type,combo_box5,"避障:");
+//    getQComboBoxItem(mainTreeWidget,Point_type,combo_box6,"方向:");
+//    getQComboBoxItem(mainTreeWidget,Point_type,combo_box7,"宽窄:");
+//    getQComboBoxItem(mainTreeWidget,Point_type,combo_box8,"坡度:");
+//    getQComboBoxItem(mainTreeWidget,Point_type,combo_box9,"室内外:");
+
+//    //parameter
+//    QTreeWidgetItem *Parameter=new QTreeWidgetItem();
+//    //Parameter->setIcon(0,QIcon(":/res/images/Link.png"));
+//    mainTreeWidget->addTopLevelItem(Parameter);
+//    Parameter->setText(0,QString("参数"));
+
+//    auto line_edit7 = new QLineEdit(this);
+//    //auto line_edit8 = new QLineEdit(this);
+//    auto line_edit9 = new QLineEdit(this);
+//    auto line_edit10 = new QLineEdit(this);
+
+//    getQLineEditItem(mainTreeWidget,Parameter,line_edit7,"限速/编号:");
+//    getQComboBoxItem(mainTreeWidget,Parameter,combo_box10,"链接:");
+//    getQLineEditItem(mainTreeWidget,Parameter,line_edit9,"链接号:");
+//    getQLineEditItem(mainTreeWidget,Parameter,line_edit10,"laneletid/楼层:");
+
+//    //info
+//    QTreeWidgetItem *infomessage=new QTreeWidgetItem();
+//    //infomessage->setIcon(0,QIcon(":/res/images/infomessage.png"));
+//    mainTreeWidget->addTopLevelItem(infomessage);
+//    infomessage->setText(0,QString("信息"));
+
+//    auto my_label = new QLabel(this);
+//    auto my_label2 = new QLabel(this);
+
+//    getQLabelItem(mainTreeWidget,infomessage,my_label,"vmap总数:");
+//    getQLabelItem(mainTreeWidget,infomessage,my_label2,"lanelet2总数:");
+
+//    //pcd-z
+//    // QTreeWidgetItem *Point_z=new QTreeWidgetItem();
+//    // Point_z->setIcon(0,QIcon(":/res/images/Point.png"));
+//    // mainTreeWidget->addTopLevelItem(Point_z);
+//    // Point_z->setText(0,QString("高度"));
+
+//    // getQLineEditItem(mainTreeWidget,Point_z,mainwindow_->pcdzmax_edit,"z-max:");
+//    // getQLineEditItem(mainTreeWidget,Point_z,mainwindow_->pcdzmin_edit,"z-min:");
+//    // getQPushButtonItem(mainTreeWidget,Point_z,mainwindow->reload_pBtn,"刷新:");
+
+//    //
+//    QTreeWidgetItem *laneletInfo=new QTreeWidgetItem();
+//    // laneletInfo->setIcon(0,QIcon(":/res/images/.png"));
+//    mainTreeWidget->addTopLevelItem(laneletInfo);
+//    laneletInfo->setText(0,QString("信息"));
+
+//    auto line_edit11 = new QLineEdit(this);
+
+//    getQLineEditItem(mainTreeWidget,laneletInfo,line_edit11,"规则ID:");

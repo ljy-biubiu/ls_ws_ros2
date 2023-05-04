@@ -2331,7 +2331,7 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "UI/include/common.h",
+			"path" : "UI/include/common_ui_type.h",
 			"sourceGroupIndex" : 2
 		},
 		{

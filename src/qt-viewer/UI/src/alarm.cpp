@@ -45,7 +45,7 @@ Alarm::Alarm(QWidget *parent) :
 
 }
 
-void Alarm::setLEDStatus( const AlarmStatus& msg  )
+void Alarm::setLEDStatus(  AlarmStatus msg  )
 {
     alarm_status = msg;
 

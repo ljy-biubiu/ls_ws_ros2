@@ -7,7 +7,7 @@
 #include <QLayout>
 #include "qtablewidget.h"
 #include "paintarea.h"
-#include "common.h"
+#include "common_ui_type.h"
 extern bool changindex ;
 
 struct tableRow2{

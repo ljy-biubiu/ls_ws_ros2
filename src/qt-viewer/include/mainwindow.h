@@ -14,6 +14,7 @@
 #include "cameraviewer.h"
 #include "webui.h"
 #include "tasklistui.h"
+#include "common_ui_type.h"
 
 
 // Visualization Toolkit (VTK)
@@ -46,11 +47,10 @@
 
 #include <QMetaType> //自定义参数类型的头文件----***
 
-typedef pcl::PointXYZRGBA PointT;
-typedef pcl::PointCloud<PointT> PointCloudT;
-typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
+
 
 Q_DECLARE_METATYPE(PointCloudTPtr) // 要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
+Q_DECLARE_METATYPE(AlarmStatus) // 要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
 
 
 QT_BEGIN_NAMESPACE

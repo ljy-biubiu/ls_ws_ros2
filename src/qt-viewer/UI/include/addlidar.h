@@ -2,7 +2,7 @@
 #define ADDLIDAR_H
 
 #include <QDialog>
-#include "common.h"
+#include "common_ui_type.h"
 #include <QScrollArea>
 #include <jsoncpp/json/json.h>
 

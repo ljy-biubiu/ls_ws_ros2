@@ -131,8 +131,18 @@ Diary::Diary(QWidget *parent) : QWidget(parent),
 
 void Diary::show_log(QString log)
 {
+
+    for (auto dat : logs)
+    {
+        if (log.toStdString() == dat.msg)
+        {
+            return;
+        }
+    }
+
     Log mylog;
     mylog.msg = log.toStdString();
+    mylog.date = MyUtil::getCurDate();
     pushLogData(mylog);
 }
 
@@ -149,8 +159,8 @@ void Diary::pushLogData(const Log &msg)
 
     for (auto msg : logs)
     {
-        table_widget_item_date = new QTableWidgetItem(QString::fromStdString(MyUtil::getCurDate()));
         table_widget_item_level = new QTableWidgetItem("Critical");
+        table_widget_item_date = new QTableWidgetItem(QString::fromStdString(msg.date));
         table_widget_item_data = new QTableWidgetItem(QString::fromStdString(msg.msg));
 
         TableWidget->setItem(cnt, 0, table_widget_item_date); // 向下复制一行 ctrl+alt+down

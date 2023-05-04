@@ -20,7 +20,7 @@
 #include <QtMath>
 #include <QPainterPath>
 #include <QMessageBox>
-#include <common.h>
+#include <common_ui_type.h>
 //#include <opencv.hpp>
 #include <iostream>
 #include <QTimer>
