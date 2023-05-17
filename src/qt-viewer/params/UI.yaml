@@ -1,0 +1,3 @@
+/qt_viewer_node:
+  ros__parameters: 
+    softName: asdds                                #软件著称

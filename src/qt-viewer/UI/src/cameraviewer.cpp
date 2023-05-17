@@ -61,10 +61,10 @@ void CameraViewer::setCameraMat(cv::Mat &msg)
 //    my_label->setPixmap(QPixmap::fromImage(image_tmp));
 }
 
-void CameraViewer::setCameraMat(QPixmap msg)
+void CameraViewer::setCameraMat(QPixmap msg ,QString name)
 {
 //    msg.scaled(600,300);
-    my_label->setPixmap(msg.scaled(600,300)); //16/9
+    my_label->setPixmap(msg.scaled(my_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation)); //16/9
 }
 
 CameraViewer::~CameraViewer()

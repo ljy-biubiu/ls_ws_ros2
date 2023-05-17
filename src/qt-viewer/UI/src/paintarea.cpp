@@ -37,7 +37,7 @@ PaintArea::PaintArea()/*区域绘图初始化*/
     LidarInstance.lidar_Radius = Radius; //测量距离(通过添加雷达实现)
 
     LidarInstance.inPolygon.clear();
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < AREAS; i++){
         LidarInstance.Polygon[i].clear();
 
     }
@@ -220,7 +220,7 @@ void PaintArea::drawArea(QPainter &painter, int index)
 
     painter.resetTransform(); //重置scale变换
     painter.scale(zoom, zoom);
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < AREAS; i++)
     {//绘制区域
         QList<PointT> tmp = area[i].Area2D_point;
         if(i==0)
@@ -229,6 +229,22 @@ void PaintArea::drawArea(QPainter &painter, int index)
              painter.setPen(QPen(Qt::darkRed, 2/zoom));
         else if(i==2)
              painter.setPen(QPen(Qt::yellow, 2/zoom));
+        else if(i==3)
+             painter.setPen(QPen(Qt::lightGray, 2/zoom));
+        else if(i==4)
+             painter.setPen(QPen(Qt::green, 2/zoom));
+        else if(i==5)
+             painter.setPen(QPen(Qt::darkGreen, 2/zoom));
+        else if(i==6)
+             painter.setPen(QPen(Qt::darkCyan, 2/zoom));
+        else if(i==7)
+             painter.setPen(QPen(Qt::magenta, 2/zoom));
+        else if(i==8)
+             painter.setPen(QPen(Qt::darkYellow, 2/zoom));
+        else if(i==9)
+             painter.setPen(QPen(Qt::gray, 2/zoom));
+
+
         for(int k = 0; k < tmp.size(); k++)
         {
             if(tmp.size() == 1)break;
@@ -595,7 +611,7 @@ void PaintArea::areaList_T_transform()//绘图坐标系转换到真实坐标系
 {
     float msx = PAINT_SIZE/2 /LidarInstance.lidar_Radius;
     float msy = PAINT_SIZE/2 /LidarInstance.lidar_Radius;
-    for(int index =0;index<3;index++){
+    for(int index =0;index<AREAS;index++){
 
         area[index].Area2D_point.clear();
         for(int i = 0;i < area[index].Area2D_point_T.size();i++)

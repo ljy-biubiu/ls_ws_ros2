@@ -18,7 +18,7 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     mainLayOut();
     mainEventCallback();
 
-    /******************************************** 设置qss样式表 ********************************************/
+    /************************************************* 设置qss样式表 ********************************************/
     QFile file(":/qss/darkblue.css");
     if (file.open(QFile::ReadOnly))
     {
@@ -38,17 +38,15 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     screen = new QSplashScreen(pixmap);
     screen->show();
 
-    //    task_list_ui->show();
-
-    // auto aaa = std::make_unique<TaskListUi>(this);
-    // aaa->show();
+    // usleep(1000*1000);
+    ros_talk->start();
 }
 
 void MainWindow::initObeject()
 {
     ros_talk = new RosTalk();
-    imageWidget = new ImageWidget();
-    imageWidget2 = new ImageWidget();
+    frameWidgetLidar = new ImageWidget();
+    frameWidgetCamera = new ImageWidget();
     mainImageWidget = new ImageWidget();
     // add_lidar = std::make_unique<AddLidar()
     main_title_bar = new MainTitleBar();
@@ -99,14 +97,6 @@ void MainWindow::paint_area_2setROI()
 
 void MainWindow::updateCameraImage()
 {
-    // cv::Mat cur_image;
-    // if (!this->cameraDriveInterface->get_camera_data(cur_image))
-    // {
-    //     return;
-    // }
-
-    // this->camera_viewer->setCameraMat(cur_image);
-    // this->camera_viewer2->setCameraMat(cur_image);
 }
 
 void MainWindow::updateAlgPointCould()
@@ -243,7 +233,7 @@ void MainWindow::show_dect_data(DectData msg)
 
     // 2D paint
     vector<vector<PointT>> areaPoints;
-    for (int i{0}; 3 > i; i++)
+    for (int i{0}; AREAS > i; i++)
     {
         vector<PointT> linePoints;
         //        Point.x = this->paint_area->area[i].Area2D_point_T.x;
@@ -359,25 +349,26 @@ void MainWindow::mainLayOut()
     body_layout->setStretchFactor(left_body_layout, 9);
     body_layout->setStretchFactor(right_body_layout, 6);
 
-    cameraLayout->addWidget(camera_viewer2);
-    imageWidget2->setLayout(cameraLayout);
+
+     cameraLayout->addWidget(camera_viewer2);
+     frameWidgetCamera->setLayout(cameraLayout);
 
     ///////////////////////////////////////////////////////////////////////////////
 
-    auto a = new QWidget();
-    auto b = new QWidget();
+    camera_block_l = new QWidget();
+    camera_block_r = new QWidget();
 
     // 设置背景黑色
-    QPalette palBackGround(a->palette());
+    QPalette palBackGround(camera_block_l->palette());
     palBackGround.setColor(QPalette::Background, QColor(23, 23, 23));
-    a->setAutoFillBackground(true);
-    a->setPalette(palBackGround);
+    camera_block_l->setAutoFillBackground(true);
+    camera_block_l->setPalette(palBackGround);
 
     // 设置背景黑色
-    QPalette palBackGround_b(b->palette());
+    QPalette palBackGround_b(camera_block_r->palette());
     palBackGround_b.setColor(QPalette::Background, QColor(23, 23, 23));
-    b->setAutoFillBackground(true);
-    b->setPalette(palBackGround_b);
+    camera_block_r->setAutoFillBackground(true);
+    camera_block_r->setPalette(palBackGround_b);
 
     right_body_layout->setMargin(0);
     right_camera_layout->setMargin(0);
@@ -386,13 +377,13 @@ void MainWindow::mainLayOut()
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    right_camera_layout->addWidget(a);
+    right_camera_layout->addWidget(camera_block_l);
     right_camera_layout->addWidget(camera_viewer);
-    right_camera_layout->addWidget(b);
+    right_camera_layout->addWidget(camera_block_r);
 
-    right_camera_layout->setStretchFactor(a, 1);
+    right_camera_layout->setStretchFactor(camera_block_l, 1);
     right_camera_layout->setStretchFactor(camera_viewer, 7);
-    right_camera_layout->setStretchFactor(b, 1);
+    right_camera_layout->setStretchFactor(camera_block_r, 1);
 
     right_data_layout->addWidget(diary);
     right_data_layout->addWidget(alarm);
@@ -410,17 +401,14 @@ void MainWindow::mainLayOut()
 
     right_table_layout->addWidget(web_ui);
 
-    imageWidget->setLayout(vtkLayout);
+    frameWidgetLidar->setLayout(vtkLayout);
     vtkLayout->addWidget(qvtkOpenglNativeWidget);
     paramsListLayout->addWidget(task_list_ui);
 
-    imageWidget_layout->addWidget(imageWidget);
+    imageWidget_layout->addWidget(frameWidgetLidar);
 
     left_body_layout->addLayout(paramsListLayout);
     left_body_layout->addLayout(imageWidget_layout);
-    //    left_body_layout->setStretchFactor(paramsListLayout, 4);
-    //    left_body_layout->setStretchFactor(imageWidget_layout, 9);
-    // left_body_layout->addWidget(camera_viewer);
 
     for (int i = 0; i < paramsListLayout->count(); ++i)
     {
@@ -474,6 +462,8 @@ void MainWindow::initMenu()
     save_point_cloud = new QAction(tr("&saveCloud"), this);
     svae_background_pont_cloud = new QAction(tr("&saveBCloud"), this);
 
+    qt_version = new QAction(tr("&QT_VERSION"), this);
+
     connect(view_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode_Action()));
     connect(view1_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode1_Action()));
     connect(view2_mode, SIGNAL(triggered(bool)), this, SLOT(view_mode2_Action()));
@@ -481,6 +471,7 @@ void MainWindow::initMenu()
     connect(lidar_area_set, SIGNAL(triggered(bool)), this, SLOT(lidar_area_set_Action()));
     connect(save_point_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_cloud_set_Action()));
     connect(svae_background_pont_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_backgourd_cloud_set_Action()));
+    connect(qt_version, SIGNAL(triggered(bool)), my_app, SLOT(aboutQt()));
 }
 
 void MainWindow::initToolBar()
@@ -507,6 +498,9 @@ void MainWindow::initToolBar()
     fileToolBar->addAction(save_point_cloud);
     fileToolBar->addAction(svae_background_pont_cloud);
 
+    fileToolBar->addSeparator();
+    fileToolBar->addAction(qt_version);
+
     // addToolBar(Qt::LeftToolBarArea,fileToolBar);
     addToolBar(Qt::BottomToolBarArea, fileToolBar);
     //    static QMenu *fileMenu = menuBar()->addMenu ( tr ( "&File" ) );
@@ -525,8 +519,8 @@ void MainWindow::initConnect()
     QObject::connect(setROI, SIGNAL(sigalareasize(int)), paint_area, SLOT(SlotAreaSize(int)));
     QObject::connect(setROI, SIGNAL(sigSaveAreaData()), this, SLOT(getAreaDatas()));
     QObject::connect(this, SIGNAL(emitTopicSetParams(QString)), ros_talk, SLOT(saveTopicParams(QString)));
-    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer, SLOT(setCameraMat(QPixmap)));
-    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap)), camera_viewer2, SLOT(setCameraMat(QPixmap)));
+    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer, SLOT(setCameraMat(QPixmap,QString)));
+    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer2, SLOT(setCameraMat(QPixmap,QString)));
     QObject::connect(ros_talk, SIGNAL(emit_lidar_drive(PointCloudTPtr)), this, SLOT(receive_lidar_driver(PointCloudTPtr)));
     QObject::connect(ros_talk, SIGNAL(emit_show_log(QString)), diary, SLOT(show_log(QString)));
     QObject::connect(ros_talk, SIGNAL(emit_decct_data(DectData)), this, SLOT(show_dect_data(DectData)));
@@ -615,21 +609,31 @@ void MainWindow::view_mode_Action()
     body_frame_layout->addWidget(mainImageWidget);
     mainImageWidget->setLayout(body_layout);
 
-    //    left_body_layout->addWidget(imageWidget);
+    //    left_body_layout->addWidget(frameWidgetLidar);
     //    vtkLayout->addWidget(qvtkOpenglNativeWidget);
-    imageWidget_layout->addWidget(imageWidget);
+    imageWidget_layout->addWidget(frameWidgetLidar);
+
+    // right_camera_layout->removeWidget(camera_block_l);
+    // right_camera_layout->removeWidget(camera_block_r);
+
+    // right_camera_layout->addWidget(camera_block_l);
+    // right_camera_layout->addWidget(camera_viewer);
+    // right_camera_layout->addWidget(camera_block_r);
+    // right_camera_layout->setStretchFactor(camera_block_l, 1);
+    // right_camera_layout->setStretchFactor(camera_viewer, 7);
+    // right_camera_layout->setStretchFactor(camera_block_r, 1);
 }
 
 void MainWindow::view_mode1_Action()
 {
     deleteItem(body_frame_layout);
-    body_frame_layout->addWidget(imageWidget);
+    body_frame_layout->addWidget(frameWidgetLidar);
 }
 
 void MainWindow::view_mode2_Action()
 {
     deleteItem(body_frame_layout);
-    body_frame_layout->addWidget(imageWidget2);
+    body_frame_layout->addWidget(frameWidgetCamera);
 }
 
 CameraViewer *MainWindow::getCameraWidget()
@@ -638,16 +642,14 @@ CameraViewer *MainWindow::getCameraWidget()
 }
 
 // void MainWindow::getAreaDatas()
-// {
-
-// }
+// { }
 
 void MainWindow::getAreaDatas()
 {
 
     QList<QList<PointT>> area_lists;
 
-    for (int i{0}; 3 > i; i++)
+    for (int i{0}; AREAS > i; i++)
     {
         area_lists.push_back(this->paint_area->area[i].Area2D_point_T);
     }
@@ -670,49 +672,3 @@ void MainWindow::params_set(QString msg)
     //   qDebug() << "updateTopicParams:" << msg;
     //   add_lidar->ShowData(msg);
 }
-
-// implement slot functions
-// void MainWindow::open()
-//{
-
-//}
-
-// void MainWindow::print()
-//{
-
-//}
-
-// void MainWindow::exit()
-//{
-
-//}
-
-// void MainWindow::zoomIn()
-//{
-
-//}
-
-// void MainWindow::zoomOut()
-//{
-
-//}
-
-// void MainWindow::normalSize()
-//{
-
-//}
-
-// void MainWindow::fitToWindow()
-//{
-
-//}
-
-// void MainWindow::about()
-//{
-
-//}
-
-// void MainWindow::aboutQt()
-//{
-
-//}

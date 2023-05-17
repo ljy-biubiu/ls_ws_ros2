@@ -109,14 +109,17 @@ private:
     void deleteItem(QLayout *layout);
 
 private:
-    ImageWidget *imageWidget;
-    ImageWidget *imageWidget2;
+    ImageWidget *frameWidgetLidar;
+    ImageWidget *frameWidgetCamera;
     ImageWidget *mainImageWidget;
 
     QWidget *main_widget;
     QWidget *right_camera_widget;
     QWidget *right_data_widget;
     QWidget *right_table_widget;
+    QWidget* camera_block_l;
+    QWidget* camera_block_r;
+    QWidget* childWidget;
 
     // layout
     QVBoxLayout *body_frame_layout;
@@ -149,6 +152,7 @@ private:
     QAction *lidar_area_set;
     QAction *save_point_cloud;
     QAction *svae_background_pont_cloud;
+    QAction *qt_version;
 
     QSplashScreen *screen;
     TaskListUi* task_list_ui;

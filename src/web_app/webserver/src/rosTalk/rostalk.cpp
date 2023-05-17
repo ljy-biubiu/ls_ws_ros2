@@ -63,20 +63,20 @@ void RosTalk::init()
   /////////////////////////////////////////////////////////////////////
 
   camera_driver_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
-      "/carama_driver/imgae",
+      "/carama_driver/image0",
       rclcpp::QoS{10},
       [this](const sensor_msgs::msg::Image::SharedPtr msg)
       { camera_driver_callback(msg); });
 
   lidar_datas_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/ch128x1/lslidar_point_cloud",
+      "/lidar_driver/lidar_driver",
       rclcpp::QoS{10},
       [this](const sensor_msgs::msg::PointCloud2::SharedPtr msg)
       { lidarDatasCallback(msg); });
 
   lidar_drive_sub = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/lidar_driver/lidar_driver",
-      rclcpp::QoS{1}.transient_local(),
+      "/ch128x1/lslidar_point_cloud",
+      rclcpp::QoS{1},
       [this](const sensor_msgs::msg::PointCloud2::SharedPtr msg)
       { lidar_driver_callback(msg); });
 
@@ -105,7 +105,9 @@ void RosTalk::timerCallback()
 
 void RosTalk::lidar_driver_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
 {
-   auto caculate2Bit = [](const double &val)
+  // std::cout<<"lidar_driver_callback"<<std::endl;
+
+  auto caculate2Bit = [](const double &val)
   {
     char *chCode;
     chCode = new char[20];
@@ -133,7 +135,7 @@ void RosTalk::lidar_driver_callback(const sensor_msgs::msg::PointCloud2::SharedP
   for (int i = 0; i < cloud->points.size(); i++)
   {
     // 区域过滤
-    if (abs(cloud->points[i].x) < 40 && abs(cloud->points[i].y) < 200)
+    if (abs(cloud->points[i].x) < 40 && abs(cloud->points[i].y) < 40)
     {
       // 数据精度调整
       writer_rap.String(caculate2Bit(cloud->points[i].x).c_str());
@@ -156,13 +158,18 @@ void RosTalk::lidar_driver_callback(const sensor_msgs::msg::PointCloud2::SharedP
 
 void RosTalk::camera_driver_callback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
+  static bool flag_{false};
+  flag_ = !flag_;
+  if (flag_ == false)
+    return;
+
   std::string camera_data;
   cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   cv::Mat img__ = cv_ptr->image;
-  // cv::Mat shrink;
-  // cv::resize (img__, shrink, cv::Size (img__.cols/4, img__.rows/4));
 
-  camera_data = "data:image/png;base64," + Mat2Base64(img__, "jpeg");
+  cv::Mat shrink;
+  cv::resize(img__, shrink, cv::Size(img__.cols / 2, img__.rows / 2));
+  camera_data = "data:image/png;base64," + Mat2Base64(shrink, "jpeg");
 
   std::vector<std::string> data;
   data.push_back("image");

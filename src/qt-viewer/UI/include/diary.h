@@ -7,9 +7,8 @@
 #include <QLabel>
 #include <QTableWidget>
 #include <QTableWidgetItem>
-#include <QSqlQueryModel>
+// #include <QSqlQueryModel>
 #include "my_Util.h"
-
 #include <mutex>
 
 const int log_size = 100;

@@ -14,9 +14,16 @@ void RosTalk::init()
     int argc = 0;
     char **argv = NULL;
     rclcpp::init(argc, argv);
-    node = rclcpp::Node::make_shared("qt_viewer");
-
+    node = rclcpp::Node::make_shared("qt_viewer_node");
     RCLCPP_INFO(node->get_logger(), " qt_viewer_node initialized ");
+
+    // node->declare_parameter<std::string>("softName", "镭神智能");
+    // node->get_parameter("softName", soft_name_);
+
+    // RCLCPP_INFO(node->get_logger(), soft_name_);
+    // RCLCPP_INFO(node->get_logger(), soft_name_);
+    // RCLCPP_INFO(node->get_logger(), soft_name_);
+
     // RCLCPP_INFO_STREAM(this->get_logger(), "qtviewer init");
     //  发布话题
     //  parameter_server_pub_ = this->create_publisher<std_msgs::msg::String>(
@@ -61,10 +68,20 @@ void RosTalk::init()
         { to_d_area_Callback(msg); });
 
     camera_drive_sub = node->create_subscription<sensor_msgs::msg::Image>(
-        "/carama_driver/imgae",
+        "/carama_driver/image00",
         rclcpp::QoS{1}.transient_local(),
         [this](const sensor_msgs::msg::Image::SharedPtr msg)
         { camera_drive_imgae_callback(msg); });
+
+    for (int i{0}; camera_numb > i; i++)
+    {
+        camera_drive_subs.push_back(
+            node->create_subscription<sensor_msgs::msg::Image>(
+                "/carama_driver/image" + std::to_string(i),
+                rclcpp::QoS{1}.transient_local(),
+                [&](const sensor_msgs::msg::Image::SharedPtr msg)
+                { camera_drive_imgae_callback(msg); }));
+    }
 
     lidar_drive_sub = node->create_subscription<sensor_msgs::msg::PointCloud2>(
         "/lidar_driver/lidar_driver",
@@ -83,6 +100,7 @@ void RosTalk::init()
         rclcpp::QoS{10},
         [this](const std_msgs::msg::String::SharedPtr msg)
         { log_callback(msg); });
+
 
     monitor_node_sub_ = node->create_subscription<sys_msgs::msg::GeneralTableArray>(
         "/monitor/node_alive",
@@ -107,33 +125,16 @@ void RosTalk::init()
 void RosTalk::run()
 {
 
-    // sys_msgs::msg::DectData a;
-    // sys_msgs::msg::DectectInf b;
-    // a.data_vec.push_back(b);
-
-    // for (auto v : a.data_vec)
-    // {
-    //   v.obj_inf.x = 0;
-    // }
-
-    //
     std_msgs::msg::String pub_msg;
     pub_msg.data = "";
     rclcpp::WallRate loop_rate(1000);
     while (rclcpp::ok())
     {
-        // pub_msg.data = "ss";
-        // parameter_server_pub_->publish(pub_msg);
         rclcpp::spin_some(node);
         loop_rate.sleep();
     }
     rclcpp::shutdown();
 }
-// void rclcomm::recv_callback(const std_msgs::msg::Int32::SharedPtr msg)
-// {
-//   //  RCLCPP_INFO(node->get_logger(), "I heard: '%d'", msg->data);
-//   emitTopicData("I head from ros2_qt_demo_publish:" + QString::fromStdString(std::to_string(msg->data)));
-// }
 
 void RosTalk::save_point_cloud(int msg)
 {
@@ -230,7 +231,7 @@ void RosTalk::to_d_area_Callback(const sys_msgs::msg::ToDArea::SharedPtr &msg)
 void RosTalk::saveLidarDatas(QString msg)
 {
 
-    std::cout << "------898989----" << std::endl;
+    std::cout << "------saveLidarDatas----" << std::endl;
 
     std_msgs::msg::String str;
     str.data = msg.toStdString();
@@ -297,14 +298,19 @@ void RosTalk::lidar_driver_callback(const sensor_msgs::msg::PointCloud2::SharedP
 
 void RosTalk::camera_drive_imgae_callback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
-    QImage::Format format;
-    format = QImage::Format_RGB888;
-    cv_bridge::CvImagePtr cv_ptr;
-    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-    uchar *uchar_iamge_data = cv_ptr->image.data;
-    QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
 
-    emit emit_camera_drive(showImage);
+    auto cvToQpixmap = [&](const sensor_msgs::msg::Image::SharedPtr msg)
+    {
+        QImage::Format format;
+        format = QImage::Format_RGB888;
+        cv_bridge::CvImagePtr cv_ptr;
+        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+        uchar *uchar_iamge_data = cv_ptr->image.data;
+        QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
+        return showImage;
+    };
+
+    emit emit_camera_drive(cvToQpixmap(msg),QString::fromStdString(msg->header.frame_id));
 }
 
 void RosTalk::parameterServerCallback(const std_msgs::msg::String::SharedPtr msg)
@@ -338,7 +344,6 @@ void RosTalk::saveTopicParams(QString msg)
     std_msgs::msg::String str;
     str.data = msg.toStdString();
     save_param_pub_->publish(str);
-    // std::cout<<" ============================================ s"<<std::endl;
 }
 
 void RosTalk::saveLog(QMultiMap<QString, QString> msg)

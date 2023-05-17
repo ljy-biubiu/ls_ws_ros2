@@ -13,7 +13,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/Vertices.h>
 #define PI 3.14159
-#define AREAS 3
+#define AREAS 10
 #define L_Range 10000
 #define Coord_proportion (L_Range * 2.0 / 1000)
 
@@ -136,7 +136,7 @@ struct lidar
     float angle_hor;
     float angle_ver;
 
-    QList<QPointF> Polygon[3]; //
+    QList<QPointF> Polygon[AREAS]; //
     QList<QPointF> inPolygon;  //
 };
 Q_DECLARE_METATYPE(lidar)
@@ -189,7 +189,7 @@ Q_DECLARE_METATYPE(SetData)
 struct point_data
 {
     QList<QPointF> out;
-    QList<QPointF> in[3];
+    QList<QPointF> in[AREAS];
     QList<QPointF> clust_in;
     int lidarIndex;
 };

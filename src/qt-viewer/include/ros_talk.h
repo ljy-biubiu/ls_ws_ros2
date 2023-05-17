@@ -125,13 +125,15 @@ private:
 
     // 参数服务
     Json::Value parameter_server_;
-
     std::shared_ptr<rclcpp::Node> node;
     AlarmStatus alarm_status;
+    std::string soft_name_;
+    const int camera_numb{4};
+    std::vector<rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr> camera_drive_subs;
 
 signals:
     void emitTopicParams(QString);
-    void emit_camera_drive(QPixmap);
+    void emit_camera_drive(QPixmap,QString);
     void emit_lidar_drive(PointCloudTPtr);
     void emit_show_log(QString);
     void emit_decct_data(DectData);

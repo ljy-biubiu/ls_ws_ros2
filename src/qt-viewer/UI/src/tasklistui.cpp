@@ -2,6 +2,7 @@
 #include "qdebug.h"
 #include "QHBoxLayout"
 #include <iostream>
+#include <sstream>
 #include "childtitlebar.h"
 
 
@@ -52,63 +53,6 @@ TaskListUi::TaskListUi(QWidget *parent)
     //    getQCheckBoxItem(mainTreeWidget, Tool, check_box, "vmap-tool:");
     //    getQCheckBoxItem(mainTreeWidget, Tool, check_box2, "lanelet-tool:");
 
-    //雷达参数
-    QTreeWidgetItem *lidarParams = new QTreeWidgetItem();
-    mainTreeWidget->addTopLevelItem(lidarParams);
-    lidarParams->setText(0, QString("雷达参数"));
-
-
-    for (int i = 0; i < 1; i++)
-    {
-        QTreeWidgetItem *lidarParams_1 = new QTreeWidgetItem();
-        lidarParams->addChild(lidarParams_1); ///
-        lidarParams_1->setText(0, QString("雷达 ") + QString::number(i + 1));
-
-        LM_line_edit_lidar_IP = new QLineEdit(this);
-        LM_line_edit_lidar_device_port = new QLineEdit(this);
-        LM_line_edit_lidar_data_port = new QLineEdit(this);
-        LM_line_edit_lidar_x = new QLineEdit(this);
-        LM_line_edit_lidar_y = new QLineEdit(this);
-        LM_line_edit_lidar_z = new QLineEdit(this);
-        LM_line_edit_lidar_picth = new QLineEdit(this);
-        LM_line_edit_lidar_roll = new QLineEdit(this);
-        LM_line_edit_lidar_yaw = new QLineEdit(this);
-
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_IP, "IP"+QString::fromStdString( std::to_string(i)));
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_device_port, "Device_Port"+QString::fromStdString( std::to_string(i)));
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_data_port, "Data_Port"+QString::fromStdString( std::to_string(i)));
-
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_x, "x_offset"+QString::fromStdString( std::to_string(i)));
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_y, "y_offset"+QString::fromStdString( std::to_string(i)));
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_z, "z_offset"+QString::fromStdString( std::to_string(i)));
-
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_picth, "pitch"+QString::fromStdString( std::to_string(i)));
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_roll, "roll"+QString::fromStdString( std::to_string(i)));
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_yaw, "yaw"+QString::fromStdString( std::to_string(i)));
-
-    }
-
-    //摄像头
-    QTreeWidgetItem *cameraParams = new QTreeWidgetItem();
-    mainTreeWidget->addTopLevelItem(cameraParams);
-    cameraParams->setText(0, QString("摄像头参数"));
-
-    for (int i = 0; i < 1; i++)
-    {
-        QTreeWidgetItem *cameraParams_1 = new QTreeWidgetItem();
-        cameraParams->addChild(cameraParams_1); ///
-        cameraParams_1->setText(0, QString("摄像头 ") + QString::number(i + 1));
-
-        LM_line_edit_camera_IP = new QLineEdit(this);
-        LM_line_edit_camera_ID = new QLineEdit(this);
-        LM_line_edit_camera_Pass = new QLineEdit(this);
-
-
-        getQLineEditItem(mainTreeWidget, cameraParams_1, LM_line_edit_camera_IP, "ID"+ QString::number(i + 1));
-        getQLineEditItem(mainTreeWidget, cameraParams_1, LM_line_edit_camera_ID, "IP"+ QString::number(i + 1));
-        getQLineEditItem(mainTreeWidget, cameraParams_1, LM_line_edit_camera_Pass, "Pass"+ QString::number(i + 1));
-
-    }
 
     //显示设置
     QTreeWidgetItem *showParams = new QTreeWidgetItem();
@@ -131,14 +75,93 @@ TaskListUi::TaskListUi(QWidget *parent)
         RB_line_show_distance->setChecked(true);
         LM_line_show_box_size->setText("1");
 
-        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_is_open, "is_show_open");
-        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_classify, "is_show_classify");
-        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_distance, "is_show_distance");
-        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_velocity, "is_show_velocit");
-        getQLineEditItem(mainTreeWidget, showParams_1, LM_line_show_box_size, "show_box_size");
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_is_open, "开启开关");
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_classify, "显示分类");
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_distance, "显示距离");
+        getQCheckBoxItem(mainTreeWidget, showParams_1, RB_line_show_velocity, "显示速度");
+        getQLineEditItem(mainTreeWidget, showParams_1, LM_line_show_box_size, "字号大小");
 
     }
 
+    for (int i = 0; i < 1; i++)
+    {
+        QTreeWidgetItem *showParams_1 = new QTreeWidgetItem();
+        showParams->addChild(showParams_1); ///
+        showParams_1->setText(0, QString(" 相机模式 "));
+
+        block_camera_mode = new QButtonGroup(this);            //分组
+        multi_camera = new QRadioButton(this);
+        solo_camera = new QRadioButton(this);
+        solo_camera->setChecked(true);
+
+        block_camera_mode->addButton(solo_camera,0);                   //一个值为0
+        block_camera_mode->addButton(multi_camera,1);                 //一个值为1
+
+        getQRadiobuttonItem(mainTreeWidget, showParams_1, solo_camera, "单相机模式");
+        getQRadiobuttonItem(mainTreeWidget, showParams_1, multi_camera, "多相机模式");
+
+    }
+    //    block_camera_mode->checkedId();
+
+    //雷达参数
+    QTreeWidgetItem *lidarParams = new QTreeWidgetItem();
+    mainTreeWidget->addTopLevelItem(lidarParams);
+    lidarParams->setText(0, QString("雷达参数"));
+
+    for (int i = 0; i < 4; i++)
+    {
+        QTreeWidgetItem *lidarParams_1 = new QTreeWidgetItem();
+        lidarParams->addChild(lidarParams_1); ///
+        lidarParams_1->setText(0, QString("雷达 ") + QString::number(i + 1));
+
+        LM_line_edit_lidar_IP.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_device_port.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_data_port.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_x.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_y.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_z.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_picth.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_roll.push_back(new QLineEdit(this));
+        LM_line_edit_lidar_yaw.push_back(new QLineEdit(this));
+
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_IP[i], "雷达地址"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_device_port[i], "设备端口"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_data_port[i], "数据端口"+QString::fromStdString( std::to_string(i)));
+
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_x[i], "X轴相距(m)"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_y[i], "y轴相距(m)"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_z[i], "z轴相距(m)"+QString::fromStdString( std::to_string(i)));
+
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_picth[i], "Y方向(角度)"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_roll[i], "X轴方向(角度)"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_yaw[i], "Z轴方向(角度)"+QString::fromStdString( std::to_string(i)));
+
+        //        mainTreeWidget->
+        //        lidarParams_1->setExpanded(true);
+    }
+    //    lidarParams->
+    lidarParams->setExpanded(false);
+
+    //摄像头
+    QTreeWidgetItem *cameraParams = new QTreeWidgetItem();
+    mainTreeWidget->addTopLevelItem(cameraParams);
+    cameraParams->setText(0, QString("摄像头参数"));
+
+    for (int i = 0; i < 4; i++)
+    {
+        QTreeWidgetItem *cameraParams_1 = new QTreeWidgetItem();
+        cameraParams->addChild(cameraParams_1); ///
+        cameraParams_1->setText(0, QString("摄像头 ") + QString::number(i + 1));
+
+        LM_line_edit_camera_IP.push_back(new QLineEdit(this));
+        LM_line_edit_camera_ID.push_back(new QLineEdit(this));
+        LM_line_edit_camera_Pass.push_back(new QLineEdit(this));
+
+        getQLineEditItem(mainTreeWidget, cameraParams_1, LM_line_edit_camera_IP[i], "用户名"+ QString::number(i + 1));
+        getQLineEditItem(mainTreeWidget, cameraParams_1, LM_line_edit_camera_ID[i], "相机IP"+ QString::number(i + 1));
+        getQLineEditItem(mainTreeWidget, cameraParams_1, LM_line_edit_camera_Pass[i], "密码"+ QString::number(i + 1));
+
+    }
 
 
     //检测配置
@@ -152,9 +175,9 @@ TaskListUi::TaskListUi(QWidget *parent)
         LM_line_edit_maxSize = new QLineEdit(this);
         LM_line_edit_minSize = new QLineEdit(this);
 
-        getQLineEditItem(mainTreeWidget, detectorParams, LM_line_edit_Tolerance, "Tolerance");
-        getQLineEditItem(mainTreeWidget, detectorParams, LM_line_edit_maxSize, "maxSize");
-        getQLineEditItem(mainTreeWidget, detectorParams, LM_line_edit_minSize, "minSize");
+        getQLineEditItem(mainTreeWidget, detectorParams, LM_line_edit_Tolerance, "聚类距离");
+        getQLineEditItem(mainTreeWidget, detectorParams, LM_line_edit_maxSize, "聚类最大值");
+        getQLineEditItem(mainTreeWidget, detectorParams, LM_line_edit_minSize, "聚类最小值");
 
     }
 
@@ -183,23 +206,26 @@ TaskListUi::TaskListUi(QWidget *parent)
         LM_line_save_bclold_min = new QLineEdit(this);
         LM_line_roi_limit = new QLineEdit(this);
         LM_line_detect_text_size = new QLineEdit(this);
+        LM_line_difference_threshold = new QLineEdit(this);
 
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_Area_height_down, "Area_height_down");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_Area_height_top, "Area_height_top");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_edit_K, "K");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_euclidean_disatance, "euclidean_disatance");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_interpolation_interval, "interpolation_interval");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_m_grid_x, "m_grid_x");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_m_grid_y, "m_grid_y");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_m_grid_z, "m_grid_z");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_resolution, "resolution");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_start_dist, "start_dist");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_cloudMapFrame, "cloudMapFrame");
-        getQCheckBoxItem(mainTreeWidget, preprocessorParams, RB_line_save_bclold_isOpen, "save_bclold_isOpen");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_save_bclold_hour, "save_bclold_hour");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_save_bclold_min, "save_bclold_min");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_roi_limit, "roi_limit");
-        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_detect_text_size, "detect_text_size");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_Area_height_down, "防区高度最小值(m)");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_Area_height_top, "防区高度最大值(m)");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_edit_K, "K邻域值");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_euclidean_disatance, "欧式聚类值");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_interpolation_interval, "插值间距");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_m_grid_x, "下采样x值");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_m_grid_y, "下采样y值");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_m_grid_z, "下采样z值");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_resolution, "栅格大小");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_difference_threshold, "栅格高度差");
+        // difference_threshold
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_start_dist, "开始距离");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_cloudMapFrame, "点云地图保存帧数");
+        getQCheckBoxItem(mainTreeWidget, preprocessorParams, RB_line_save_bclold_isOpen, "保存背景点云");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_save_bclold_hour, "保存点云(h)");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_save_bclold_min, "保存点云(min)");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_roi_limit, "roi限制");
+        getQLineEditItem(mainTreeWidget, preprocessorParams, LM_line_detect_text_size, "检测文本大小");
 
         //        getQRadiobuttonItem(mainTreeWidget, preprocessorParams, isSaveBackgroud, "isSaveBackgroud");
 
@@ -219,10 +245,10 @@ TaskListUi::TaskListUi(QWidget *parent)
         LM_line_edit_UplodaDeviceId = new QLineEdit(this);
 
 
-        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_ServerAddress, "ServerAddress");
-        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_ServerPort, "ServerPort");
-        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_UploadDataAddress, "UploadDataAddress");
-        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_UplodaDeviceId, "UplodaDeviceId");
+        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_ServerAddress, "服务端地址");
+        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_ServerPort, "服务端口");
+        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_UploadDataAddress, "上传数据地址");
+        getQLineEditItem(mainTreeWidget, webParams, LM_line_edit_UplodaDeviceId, "上传设备编号");
 
     }
 
@@ -230,7 +256,7 @@ TaskListUi::TaskListUi(QWidget *parent)
     //mqtt配置
     QTreeWidgetItem *mqttParams = new QTreeWidgetItem();
     mainTreeWidget->addTopLevelItem(mqttParams);
-    mqttParams->setText(0, QString("网络配置参数"));
+    mqttParams->setText(0, QString("mqtt配置参数"));
 
     for (int i = 0; i < 1; i++)
     {
@@ -251,14 +277,12 @@ TaskListUi::TaskListUi(QWidget *parent)
 
 
 
-
-
     //按钮
     comfire_button = new QPushButton(this);
     comfire_button->setText("保存");
     comfire_button->setMaximumSize(380, 30);
     comfire_button->setMinimumSize(380, 30);
-    mainTreeWidget->expandAll();
+    //    mainTreeWidget->expandAll();
     this->setMinimumWidth(400);
     this->setMaximumWidth(400);
     ////        this->setWindowFlags(Qt::FramelessWindowHint);
@@ -271,18 +295,25 @@ TaskListUi::TaskListUi(QWidget *parent)
 
 
 
-//try {
-//    bool success = reader->parse(jsonStr.c_str(), jsonStr.c_str() + jsonStr.size(), &root, nullptr);
-//    if (!success) {
-//        throw std::runtime_error("Failed to parse JSON");
-//    }
-//}
-//catch (const std::exception& e) {
-//    std::cerr << "Error: " << e.what() << std::endl;
-//    // 处理异常
-//}
+QString getJsonData(Json::Value json_value,std::string fir,std::string last,int trm = 0)
+{
+    if(json_value.isNull())
+    {
+        qCritical()<<"解析"<<QString::fromStdString(fir)<<" "<<QString::fromStdString(last)<<" json数据失败！";
+        return QString();
+    }
+    else {
+        if(trm == 0)
+        {
+            return QString::fromStdString(json_value[fir][last].asString());
+        }
+        else
+        {
+            return QString::fromStdString(json_value[fir][last].asString()).left(trm);
+        }
 
-//std::string
+    }
+}
 
 
 void TaskListUi::updateTopicParams(QString msg)
@@ -295,75 +326,84 @@ void TaskListUi::updateTopicParams(QString msg)
     reader.parse(msg.toStdString(), parameter_server); // LidarParam.LidarParam0.IP
 
     //mqtt
-    LM_line_edit_SendPort->setText(QString::fromStdString( parameter_server["mqtt"]["SendPort"].asString()).left(15));
-    LM_line_edit_3d_lidar_id->setText(QString::fromStdString( parameter_server["mqtt"]["3d_lidar_id"].asString()).left(15));
-    LM_line_edit_SendAddress->setText(QString::fromStdString( parameter_server["mqtt"]["SendAddress"].asString()).left(15));
-    LM_line_edit_info_topic->setText(QString::fromStdString( parameter_server["mqtt"]["info_topic"].asString()).left(15));
-    LM_line_edit_status_topic->setText(QString::fromStdString( parameter_server["mqtt"]["status_topic"].asString()).left(15));
+    LM_line_edit_SendPort->setText(getJsonData(parameter_server,"mqtt","SendPort",15));
+    LM_line_edit_3d_lidar_id->setText(getJsonData( parameter_server,"mqtt","3d_lidar_id",15));
+    LM_line_edit_SendAddress->setText(getJsonData( parameter_server,"mqtt","SendAddress",15));
+    LM_line_edit_info_topic->setText(getJsonData( parameter_server,"mqtt","info_topic",15));
+    LM_line_edit_status_topic->setText(getJsonData( parameter_server,"mqtt","status_topic",15));
 
     //web
-    LM_line_edit_ServerAddress->setText(QString::fromStdString( parameter_server["web"]["ServerAddress"].asString()).left(15));
-    LM_line_edit_ServerPort->setText(QString::fromStdString( parameter_server["web"]["ServerPort"].asString()).left(15));
-    LM_line_edit_UploadDataAddress->setText(QString::fromStdString( parameter_server["web"]["UploadDataAddress"].asString()).left(15));
-    LM_line_edit_UplodaDeviceId->setText(QString::fromStdString( parameter_server["web"]["UplodaDeviceId"].asString()).left(15));
+    LM_line_edit_ServerAddress->setText(getJsonData( parameter_server,"web","ServerAddress",15));
+    LM_line_edit_ServerPort->setText(getJsonData( parameter_server,"web","ServerPort",15));
+    LM_line_edit_UploadDataAddress->setText(getJsonData( parameter_server,"web","UploadDataAddress",15));
+    LM_line_edit_UplodaDeviceId->setText(getJsonData( parameter_server,"web","UplodaDeviceId",15));
 
 
-    //show
-    RB_line_show_is_open->setChecked(std::stoi(parameter_server["show"]["is_show_open"].asString()));
-    RB_line_show_classify->setChecked(std::stoi( parameter_server["show"]["is_show_classify"].asString()));
-    RB_line_show_distance->setChecked(std::stoi( parameter_server["show"]["is_show_distance"].asString()));
-    RB_line_show_velocity->setChecked(std::stoi( parameter_server["show"]["is_show_velocit"].asString()));
-    LM_line_show_box_size->setText(QString::fromStdString( parameter_server["show"]["show_box_size"].asString()).left(15));
+    // show
+    RB_line_show_is_open->setChecked(std::stoi(getJsonData(parameter_server,"show","is_show_open").toStdString()));
+    RB_line_show_classify->setChecked(std::stoi( getJsonData(parameter_server,"show","is_show_classify").toStdString()));
+    RB_line_show_distance->setChecked(std::stoi( getJsonData(parameter_server,"show","is_show_distance").toStdString()));
+    RB_line_show_velocity->setChecked(std::stoi( getJsonData(parameter_server,"show","is_show_velocit").toStdString()));
+    LM_line_show_box_size->setText(getJsonData( parameter_server,"show","show_box_size"));
 
-
+    if(std::stoi( getJsonData(parameter_server,"show","camera_mode").toStdString())==1)
+    {
+        multi_camera->setChecked(true);
+    }
+    else
+    {
+        solo_camera->setChecked(true);
+    }
 
     //preprocessor
-    LM_line_Area_height_down->setText(QString::fromStdString( parameter_server["preprocessor"]["Area_height_down"].asString()).left(8));
-    LM_line_Area_height_top->setText(QString::fromStdString( parameter_server["preprocessor"]["Area_height_top"].asString()).left(8));
-    LM_line_edit_K->setText(QString::fromStdString( parameter_server["preprocessor"]["K"].asString()).left(8));
-    LM_line_euclidean_disatance->setText(QString::fromStdString( parameter_server["preprocessor"]["euclidean_disatance"].asString()).left(8));
-    LM_line_interpolation_interval->setText(QString::fromStdString( parameter_server["preprocessor"]["interpolation_interval"].asString()).left(8));
-    LM_line_m_grid_x->setText(QString::fromStdString( parameter_server["preprocessor"]["m_grid_x"].asString()).left(8));
-    LM_line_m_grid_y->setText(QString::fromStdString( parameter_server["preprocessor"]["m_grid_y"].asString()).left(8));
-    LM_line_m_grid_z->setText(QString::fromStdString( parameter_server["preprocessor"]["m_grid_z"].asString()).left(8));
-    LM_line_resolution->setText(QString::fromStdString( parameter_server["preprocessor"]["resolution"].asString()).left(8));
-    LM_line_start_dist->setText(QString::fromStdString( parameter_server["preprocessor"]["start_dist"].asString()).left(8));
+    LM_line_Area_height_down->setText(getJsonData( parameter_server,"preprocessor","Area_height_down",8));
+    LM_line_Area_height_top->setText(getJsonData( parameter_server,"preprocessor","Area_height_top",8));
+    LM_line_edit_K->setText(getJsonData( parameter_server,"preprocessor","K",8));
+    LM_line_euclidean_disatance->setText(getJsonData( parameter_server,"preprocessor","euclidean_disatance",8));
+    LM_line_interpolation_interval->setText(getJsonData( parameter_server,"preprocessor","interpolation_interval",8));
+    LM_line_m_grid_x->setText(getJsonData( parameter_server,"preprocessor","m_grid_x",8));
+    LM_line_m_grid_y->setText(getJsonData( parameter_server,"preprocessor","m_grid_y",8));
+    LM_line_m_grid_z->setText(getJsonData( parameter_server,"preprocessor","m_grid_z",8));
+    LM_line_resolution->setText(getJsonData( parameter_server,"preprocessor","resolution",8));
+    LM_line_difference_threshold->setText(getJsonData( parameter_server,"preprocessor","difference_threshold",8));
+    LM_line_start_dist->setText(getJsonData( parameter_server,"preprocessor","start_dist",8));
 
-    LM_line_cloudMapFrame->setText(QString::fromStdString( parameter_server["preprocessor"]["cloudMapFrame"].asString()).left(8));
-    RB_line_save_bclold_isOpen->setChecked(std::stoi(parameter_server["preprocessor"]["save_bclold_isOpen"].asString()));
-    //    RB_line_save_bclold_isOpen->setText(QString::fromStdString( parameter_server["preprocessor"]["save_bclold_isOpen"].asString()).left(8));
-    LM_line_save_bclold_hour->setText(QString::fromStdString( parameter_server["preprocessor"]["save_bclold_hour"].asString()).left(8));
-    LM_line_save_bclold_min->setText(QString::fromStdString( parameter_server["preprocessor"]["save_bclold_min"].asString()).left(8));
-    LM_line_roi_limit->setText(QString::fromStdString( parameter_server["preprocessor"]["roi_limit"].asString()).left(8));
+    LM_line_cloudMapFrame->setText(getJsonData( parameter_server,"preprocessor","cloudMapFrame",8));
+    RB_line_save_bclold_isOpen->setChecked(std::stoi(getJsonData( parameter_server,"preprocessor","save_bclold_isOpen").toStdString()));
+    //    RB_line_save_bclold_isOpen->setText(getJsonData( parameter_server,"preprocessor","save_bclold_isOpen",8));
+    LM_line_save_bclold_hour->setText(getJsonData( parameter_server,"preprocessor","save_bclold_hour",8));
+    LM_line_save_bclold_min->setText(getJsonData( parameter_server,"preprocessor","save_bclold_min",8));
+    LM_line_roi_limit->setText(getJsonData( parameter_server,"preprocessor","roi_limit",8));
 
     //    LM_line_detect_text_size, "detect_text_size");
 
 
     //Detector
-    LM_line_edit_Tolerance->setText(QString::fromStdString( parameter_server["Detector"]["Tolerance"].asString()).left(8));
-    LM_line_edit_maxSize->setText(QString::fromStdString( parameter_server["Detector"]["maxSize"].asString()).left(8));
-    LM_line_edit_minSize->setText(QString::fromStdString( parameter_server["Detector"]["minSize"].asString()).left(8));
-
+    LM_line_edit_Tolerance->setText(getJsonData( parameter_server,"Detector","Tolerance",8));
+    LM_line_edit_maxSize->setText(getJsonData( parameter_server,"Detector","maxSize",8));
+    LM_line_edit_minSize->setText(getJsonData( parameter_server,"Detector","minSize",8));
 
     //Lidar
-    LM_line_edit_lidar_IP->setText(QString::fromStdString( parameter_server["Lidar"]["device_ip"].asString()).left(15));
-    LM_line_edit_lidar_device_port->setText(QString::fromStdString( parameter_server["Lidar"]["device_port"].asString()).left(15));
-    LM_line_edit_lidar_data_port->setText(QString::fromStdString( parameter_server["Lidar"]["data_port"].asString()).left(15));
-    LM_line_edit_lidar_x->setText(QString::fromStdString( parameter_server["Lidar"]["x_offset"].asString()).left(10));
-    LM_line_edit_lidar_y->setText(QString::fromStdString( parameter_server["Lidar"]["y_offset"].asString()).left(10));
-    LM_line_edit_lidar_z->setText(QString::fromStdString( parameter_server["Lidar"]["z_offset"].asString()).left(10));
-    LM_line_edit_lidar_picth->setText(QString::fromStdString( parameter_server["Lidar"]["setXAngle"].asString()).left(10));
-    LM_line_edit_lidar_roll->setText(QString::fromStdString( parameter_server["Lidar"]["setYAngle"].asString()).left(10));
-    LM_line_edit_lidar_yaw->setText(QString::fromStdString( parameter_server["Lidar"]["setZAngle"].asString()).left(10));
-
+    for(int i{0};LM_line_edit_lidar_IP.size()>i;i++)
+    {
+        LM_line_edit_lidar_IP[i]->setText(getJsonData( parameter_server,"Lidar","device_ip"+std::to_string(i)));
+        LM_line_edit_lidar_device_port[i]->setText(getJsonData( parameter_server,"Lidar","device_port"+std::to_string(i)));
+        LM_line_edit_lidar_data_port[i]->setText(getJsonData( parameter_server,"Lidar","data_port"+std::to_string(i)));
+        LM_line_edit_lidar_x[i]->setText(getJsonData( parameter_server,"Lidar","x_offset"+std::to_string(i),10));
+        LM_line_edit_lidar_y[i]->setText(getJsonData( parameter_server,"Lidar","y_offset"+std::to_string(i),10));
+        LM_line_edit_lidar_z[i]->setText(getJsonData( parameter_server,"Lidar","z_offset"+std::to_string(i),10));
+        LM_line_edit_lidar_picth[i]->setText(getJsonData( parameter_server,"Lidar","setXAngle"+std::to_string(i),10));
+        LM_line_edit_lidar_roll[i]->setText(getJsonData( parameter_server,"Lidar","setYAngle"+std::to_string(i),10));
+        LM_line_edit_lidar_yaw[i]->setText(getJsonData( parameter_server,"Lidar","setZAngle"+std::to_string(i),10));
+    }
 
     //Camera
-    LM_line_edit_camera_IP->setText(QString::fromStdString( parameter_server["Camera"]["IP"].asString()).left(15));
-    LM_line_edit_camera_ID->setText(QString::fromStdString( parameter_server["Camera"]["ID"].asString()).left(15));
-    LM_line_edit_camera_Pass->setText(QString::fromStdString( parameter_server["Camera"]["Pass"].asString()).left(15));
-
-
-
+    for(int i{0};LM_line_edit_camera_ID.size()>i;i++)
+    {
+        LM_line_edit_camera_IP[i]->setText(getJsonData( parameter_server,"Camera","IP"+std::to_string(i)));
+        LM_line_edit_camera_ID[i]->setText(getJsonData( parameter_server,"Camera","ID"+std::to_string(i)));
+        LM_line_edit_camera_Pass[i]->setText(getJsonData( parameter_server,"Camera","Pass"+std::to_string(i)));
+    }
 }
 
 void TaskListUi::savePushButton()
@@ -398,6 +438,7 @@ void TaskListUi::savePushButton()
     show["is_show_distance"] = Json::Value(std::to_string( RB_line_show_distance->isChecked()));
     show["is_show_velocit"] = Json::Value(std::to_string( RB_line_show_velocity->isChecked()));
     show["show_box_size"] = Json::Value(LM_line_show_box_size->text().toStdString());
+    show["camera_mode"] = Json::Value(block_camera_mode->checkedId());
     root["show"] = Json::Value(show);
 
 
@@ -411,6 +452,7 @@ void TaskListUi::savePushButton()
     preprocessor["m_grid_y"] = Json::Value(LM_line_m_grid_y->text().toStdString());
     preprocessor["m_grid_z"] = Json::Value(LM_line_m_grid_z->text().toStdString());
     preprocessor["resolution"] = Json::Value(LM_line_resolution->text().toStdString());
+    preprocessor["difference_threshold"] = Json::Value(LM_line_difference_threshold->text().toStdString());
     preprocessor["start_dist"] = Json::Value(LM_line_start_dist->text().toStdString());
 
     preprocessor["cloudMapFrame"] = Json::Value(LM_line_cloudMapFrame->text().toStdString());
@@ -429,27 +471,33 @@ void TaskListUi::savePushButton()
 
 
     Json::Value Lidar;
-    Lidar["device_ip"] = Json::Value(LM_line_edit_lidar_IP->text().toStdString());
-    Lidar["device_port"] = Json::Value(LM_line_edit_lidar_device_port->text().toStdString());
-    Lidar["data_port"] = Json::Value(LM_line_edit_lidar_data_port->text().toStdString());
-    Lidar["x_offset"] = Json::Value(LM_line_edit_lidar_x->text().toStdString());
-    Lidar["y_offset"] = Json::Value(LM_line_edit_lidar_y->text().toStdString());
-    Lidar["z_offset"] = Json::Value(LM_line_edit_lidar_z->text().toStdString());
-    Lidar["setXAngle"] = Json::Value(LM_line_edit_lidar_picth->text().toStdString());
-    Lidar["setYAngle"] = Json::Value(LM_line_edit_lidar_roll->text().toStdString());
-    Lidar["setZAngle"] = Json::Value(LM_line_edit_lidar_yaw->text().toStdString());
+    for(int i{0};LM_line_edit_lidar_IP.size()>i;i++)
+    {
+        Lidar["device_ip"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_IP[i]->text().toStdString());
+        Lidar["device_port"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_device_port[i]->text().toStdString());
+        Lidar["data_port"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_data_port[i]->text().toStdString());
+        Lidar["x_offset"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_x[i]->text().toStdString());
+        Lidar["y_offset"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_y[i]->text().toStdString());
+        Lidar["z_offset"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_z[i]->text().toStdString());
+        Lidar["setXAngle"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_picth[i]->text().toStdString());
+        Lidar["setYAngle"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_roll[i]->text().toStdString());
+        Lidar["setZAngle"+std::to_string(i)] = Json::Value(LM_line_edit_lidar_yaw[i]->text().toStdString());
+    }
     root["Lidar"] = Json::Value(Lidar);
 
     Json::Value Camera;
-    Camera["IP"] = Json::Value(LM_line_edit_camera_IP->text().toStdString());
-    Camera["ID"] = Json::Value(LM_line_edit_camera_ID->text().toStdString());
-    Camera["Pass"] = Json::Value(LM_line_edit_camera_Pass->text().toStdString());
+    for(int i{0};LM_line_edit_camera_ID.size()>i;i++)
+    {
+        Camera["IP"+std::to_string(i)] = Json::Value(LM_line_edit_camera_IP[i]->text().toStdString());
+        Camera["ID"+std::to_string(i)] = Json::Value(LM_line_edit_camera_ID[i]->text().toStdString());
+        Camera["Pass"+std::to_string(i)] = Json::Value(LM_line_edit_camera_Pass[i]->text().toStdString());
+    }
     root["Camera"] = Json::Value(Camera);
 
-    //    root["SumParams"] = Json::Value(json_dat);
-    QString final_data = QString::fromStdString( root.toStyledString() );
+    Json::FastWriter writer;
+    std::string json_string = writer.write(root);
+    QString final_data = QString::fromStdString( json_string );
     emit sigSavePushButton(final_data);
-
 }
 
 void TaskListUi::getQRadiobuttonItem(QTreeWidget *&mainTreeWidget, QTreeWidgetItem *&mainItem, QRadioButton *&radiobutton, const QString &info)

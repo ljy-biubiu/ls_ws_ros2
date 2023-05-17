@@ -9,6 +9,7 @@
 #include "QLineEdit"
 #include "QComboBox"
 #include "QRadioButton"
+#include "QButtonGroup"
 #include "QSpinBox"
 #include "QHeaderView"
 #include "QPushButton"
@@ -53,6 +54,7 @@ private:
     QLineEdit* LM_line_m_grid_y ;
     QLineEdit* LM_line_m_grid_z ;
     QLineEdit* LM_line_resolution ;
+    QLineEdit* LM_line_difference_threshold;
     QLineEdit* LM_line_start_dist ;
     QLineEdit* LM_line_cloudMapFrame;
     QCheckBox* RB_line_save_bclold_isOpen;
@@ -66,25 +68,31 @@ private:
     QLineEdit* LM_line_edit_maxSize ;
     QLineEdit* LM_line_edit_minSize ;
 
-    QLineEdit* LM_line_edit_lidar_IP ;
-    QLineEdit* LM_line_edit_lidar_device_port ;
-    QLineEdit* LM_line_edit_lidar_data_port ;
-    QLineEdit* LM_line_edit_lidar_x ;
-    QLineEdit* LM_line_edit_lidar_y ;
-    QLineEdit* LM_line_edit_lidar_z ;
-    QLineEdit* LM_line_edit_lidar_picth ;
-    QLineEdit* LM_line_edit_lidar_roll ;
-    QLineEdit* LM_line_edit_lidar_yaw ;
+    QVector<QLineEdit*> LM_line_edit_lidar_IP ;
+    QVector<QLineEdit*> LM_line_edit_lidar_device_port ;
+    QVector<QLineEdit*> LM_line_edit_lidar_data_port ;
+    QVector<QLineEdit*> LM_line_edit_lidar_x ;
+    QVector<QLineEdit*> LM_line_edit_lidar_y ;
+    QVector<QLineEdit*> LM_line_edit_lidar_z ;
+    QVector<QLineEdit*> LM_line_edit_lidar_picth ;
+    QVector<QLineEdit*> LM_line_edit_lidar_roll ;
+    QVector<QLineEdit*> LM_line_edit_lidar_yaw ;
 
-    QLineEdit* LM_line_edit_camera_IP ;
-    QLineEdit* LM_line_edit_camera_ID ;
-    QLineEdit* LM_line_edit_camera_Pass ;
+    QVector<QLineEdit*> LM_line_edit_camera_IP ;
+    QVector<QLineEdit*> LM_line_edit_camera_ID ;
+    QVector<QLineEdit*> LM_line_edit_camera_Pass ;
+
+    //    QLineEdit* LM_line_edit_camera_IP ;
+    //    QLineEdit* LM_line_edit_camera_ID ;
+    //    QLineEdit* LM_line_edit_camera_Pass ;
 
     QLineEdit* LM_line_edit_3d_lidar_id;
     QLineEdit* LM_line_edit_SendAddress ;
     QLineEdit* LM_line_edit_SendPort;
     QLineEdit* LM_line_edit_info_topic;
     QLineEdit* LM_line_edit_status_topic;
+
+
 
     QPushButton * comfire_button;
     QTreeWidgetItem * buttonItem;
@@ -96,6 +104,12 @@ public:
     QCheckBox* RB_line_show_distance;
     QCheckBox* RB_line_show_velocity;
     QLineEdit* LM_line_show_box_size;
+
+private:
+    QButtonGroup *block_camera_mode;            //分组
+    QRadioButton *multi_camera;
+    QRadioButton *solo_camera;
+
 
 signals:
     void sigSavePushButton(QString);

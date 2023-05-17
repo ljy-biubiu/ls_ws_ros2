@@ -29,7 +29,7 @@ private:
     QImage *my_image;
 
 private slots:
-    void setCameraMat(QPixmap);
+    void setCameraMat(QPixmap,QString);
 };
 
 #endif // CAMERAVIEWER_H

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(qt_viewer)
 
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -17,7 +18,7 @@ endif()
 
 
 
-#SET(CMAKE_BUILD_TYPE "Debug")
+# SET(CMAKE_BUILD_TYPE "Debug")
 
 # set(CMAKE_PREFIX_PATH "DRIVER/CAMERA/lib/qt5/bin")
 set(CMAKE_AUTOMOC ON)
@@ -59,7 +60,7 @@ find_package(sys_msgs REQUIRED)
 FIND_PACKAGE(Qt5Widgets REQUIRED NO_DEFAULT_PATH)
 find_package(PCL 1.9 REQUIRED)
 find_package(OpenCV 3.4.1 REQUIRED)
-find_package(VTK REQUIRED)
+find_package(VTK 8.2 REQUIRED)
 pkg_check_modules(JSONCPP REQUIRED jsoncpp)
 
 include_directories(
@@ -135,9 +136,10 @@ install(DIRECTORY
 )
 
 install(DIRECTORY
-  config
+  params
   DESTINATION share/${PROJECT_NAME}/
 )
 
 
-ament_package()       
+ament_package()   
+
