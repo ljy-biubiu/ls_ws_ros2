@@ -38,7 +38,7 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     screen = new QSplashScreen(pixmap);
     screen->show();
 
-    // usleep(1000*1000);
+    usleep(1000*1000);
     ros_talk->start();
 }
 
@@ -60,8 +60,8 @@ void MainWindow::initObeject()
     diary = new Diary();
     alarm = new Alarm();
 
-    camera_viewer = new CameraViewer();
-    camera_viewer2 = new CameraViewer();
+    camera_viewer = new CameraViewer(CameraViewNub::CameraViewFir);
+    camera_viewer2 = new CameraViewer(CameraViewNub::CameraViewSec);
     web_ui = new WebUi();
     add_lidar = new AddLidar();
 
@@ -74,7 +74,7 @@ void MainWindow::mainEventCallback()
     my_timer = new QTimer(this);
     my_timer->start(100);
     connect(my_timer, &QTimer::timeout, [=]()
-            {
+    {
         if(paint_area != nullptr && setROI != nullptr)
         {
             paint_area_2setROI();
@@ -350,40 +350,10 @@ void MainWindow::mainLayOut()
     body_layout->setStretchFactor(right_body_layout, 6);
 
 
-     cameraLayout->addWidget(camera_viewer2);
-     frameWidgetCamera->setLayout(cameraLayout);
+    cameraLayout->addWidget(camera_viewer2);
+    frameWidgetCamera->setLayout(cameraLayout);
 
-    ///////////////////////////////////////////////////////////////////////////////
-
-    camera_block_l = new QWidget();
-    camera_block_r = new QWidget();
-
-    // 设置背景黑色
-    QPalette palBackGround(camera_block_l->palette());
-    palBackGround.setColor(QPalette::Background, QColor(23, 23, 23));
-    camera_block_l->setAutoFillBackground(true);
-    camera_block_l->setPalette(palBackGround);
-
-    // 设置背景黑色
-    QPalette palBackGround_b(camera_block_r->palette());
-    palBackGround_b.setColor(QPalette::Background, QColor(23, 23, 23));
-    camera_block_r->setAutoFillBackground(true);
-    camera_block_r->setPalette(palBackGround_b);
-
-    right_body_layout->setMargin(0);
-    right_camera_layout->setMargin(0);
-    right_body_layout->setSpacing(0);
-    right_camera_layout->setSpacing(0);
-
-    ////////////////////////////////////////////////////////////////////////////////
-
-    right_camera_layout->addWidget(camera_block_l);
     right_camera_layout->addWidget(camera_viewer);
-    right_camera_layout->addWidget(camera_block_r);
-
-    right_camera_layout->setStretchFactor(camera_block_l, 1);
-    right_camera_layout->setStretchFactor(camera_viewer, 7);
-    right_camera_layout->setStretchFactor(camera_block_r, 1);
 
     right_data_layout->addWidget(diary);
     right_data_layout->addWidget(alarm);
@@ -449,18 +419,18 @@ void MainWindow::initMenu()
     helpMenu = new QMenu(tr("&About"), this);
 
     // add actions and add it into corresponding menu
-    view_mode = new QAction(tr("&Mode"), this);
+    view_mode = new QAction(tr("&首页"), this);
     view_mode->setShortcut(tr("ctrl+O"));
-    view1_mode = new QAction(tr("&Mode1"), this);
+    view1_mode = new QAction(tr("&雷达"), this);
     view1_mode->setShortcut(tr("ctrl+P"));
-    view2_mode = new QAction(tr("&Mode2"), this);
+    view2_mode = new QAction(tr("&相机"), this);
     view2_mode->setShortcut(tr("ctrl+Q"));
 
-    param_set = new QAction(tr("&Params"), this);
-    lidar_area_set = new QAction(tr("&Areas"), this);
+    param_set = new QAction(tr("&参数配置"), this);
+    lidar_area_set = new QAction(tr("&区域绘制"), this);
 
-    save_point_cloud = new QAction(tr("&saveCloud"), this);
-    svae_background_pont_cloud = new QAction(tr("&saveBCloud"), this);
+    save_point_cloud = new QAction(tr("&保存点云"), this);
+    svae_background_pont_cloud = new QAction(tr("&保存背景点云"), this);
 
     qt_version = new QAction(tr("&QT_VERSION"), this);
 
@@ -519,8 +489,6 @@ void MainWindow::initConnect()
     QObject::connect(setROI, SIGNAL(sigalareasize(int)), paint_area, SLOT(SlotAreaSize(int)));
     QObject::connect(setROI, SIGNAL(sigSaveAreaData()), this, SLOT(getAreaDatas()));
     QObject::connect(this, SIGNAL(emitTopicSetParams(QString)), ros_talk, SLOT(saveTopicParams(QString)));
-    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer, SLOT(setCameraMat(QPixmap,QString)));
-    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer2, SLOT(setCameraMat(QPixmap,QString)));
     QObject::connect(ros_talk, SIGNAL(emit_lidar_drive(PointCloudTPtr)), this, SLOT(receive_lidar_driver(PointCloudTPtr)));
     QObject::connect(ros_talk, SIGNAL(emit_show_log(QString)), diary, SLOT(show_log(QString)));
     QObject::connect(ros_talk, SIGNAL(emit_decct_data(DectData)), this, SLOT(show_dect_data(DectData)));
@@ -532,6 +500,14 @@ void MainWindow::initConnect()
     QObject::connect(this, SIGNAL(emit_save_point_cloud(int)), ros_talk, SLOT(save_point_cloud(int)));
     QObject::connect(this, SIGNAL(emit_save_point_backgourd_cloud(int)), ros_talk, SLOT(save_point_backgroud_cloud(int)));
     QObject::connect(ros_talk, SIGNAL(emit_alarm_data(AlarmStatus)), alarm, SLOT(setLEDStatus(AlarmStatus)));
+
+
+
+    //    connect (m_buttonGroup, SIGNAL (buttonClicked(int)), this, SLOT(onBtnFunc(int)));void setViewerMode(int);
+    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer, SLOT(setCameraMat(QPixmap,QString)));
+    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer2, SLOT(setCameraMat(QPixmap,QString)));
+    QObject::connect(task_list_ui->block_camera_mode, SIGNAL(buttonClicked(int)), camera_viewer, SLOT(setViewerMode(int)));
+    QObject::connect(task_list_ui->block_camera_mode, SIGNAL(buttonClicked(int)), camera_viewer2, SLOT(setViewerMode(int)));
 
     // void setLEDStatus( const AlarmStatus& msg  );
     //    setAreaDatas(QList<QList<PointT>> msg);
@@ -608,21 +584,12 @@ void MainWindow::view_mode_Action()
     deleteItem(body_frame_layout);
     body_frame_layout->addWidget(mainImageWidget);
     mainImageWidget->setLayout(body_layout);
-
-    //    left_body_layout->addWidget(frameWidgetLidar);
-    //    vtkLayout->addWidget(qvtkOpenglNativeWidget);
     imageWidget_layout->addWidget(frameWidgetLidar);
 
-    // right_camera_layout->removeWidget(camera_block_l);
-    // right_camera_layout->removeWidget(camera_block_r);
-
-    // right_camera_layout->addWidget(camera_block_l);
-    // right_camera_layout->addWidget(camera_viewer);
-    // right_camera_layout->addWidget(camera_block_r);
-    // right_camera_layout->setStretchFactor(camera_block_l, 1);
-    // right_camera_layout->setStretchFactor(camera_viewer, 7);
-    // right_camera_layout->setStretchFactor(camera_block_r, 1);
+    camera_viewer->setInputNum(CameraViewNub::CameraViewFir);
+    camera_viewer2->setInputNum(CameraViewNub::CameraViewFir);
 }
+
 
 void MainWindow::view_mode1_Action()
 {
@@ -634,6 +601,9 @@ void MainWindow::view_mode2_Action()
 {
     deleteItem(body_frame_layout);
     body_frame_layout->addWidget(frameWidgetCamera);
+
+    camera_viewer->setInputNum(CameraViewNub::CameraViewSec);
+    camera_viewer2->setInputNum(CameraViewNub::CameraViewSec);
 }
 
 CameraViewer *MainWindow::getCameraWidget()

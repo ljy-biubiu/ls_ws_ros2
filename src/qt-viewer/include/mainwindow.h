@@ -117,8 +117,6 @@ private:
     QWidget *right_camera_widget;
     QWidget *right_data_widget;
     QWidget *right_table_widget;
-    QWidget* camera_block_l;
-    QWidget* camera_block_r;
     QWidget* childWidget;
 
     // layout

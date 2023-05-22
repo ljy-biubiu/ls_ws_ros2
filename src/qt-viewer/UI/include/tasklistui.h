@@ -37,6 +37,9 @@ private:
     QLineEdit* creteQlineEditItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,const QString &info);
     QComboBox* creteQComboBoxEditItem(QTreeWidget* & mainTreeWidget,QTreeWidgetItem* & mainItem,const QString &info,const QStringList &list);
 
+
+    void initConnect();
+
 private:
 
 
@@ -104,8 +107,6 @@ public:
     QCheckBox* RB_line_show_distance;
     QCheckBox* RB_line_show_velocity;
     QLineEdit* LM_line_show_box_size;
-
-private:
     QButtonGroup *block_camera_mode;            //分组
     QRadioButton *multi_camera;
     QRadioButton *solo_camera;

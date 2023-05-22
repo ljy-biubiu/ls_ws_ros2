@@ -81,9 +81,7 @@
        <widget class="QLabel" name="labelTitleName">
         <property name="font">
          <font>
-          <family>微软雅黑</family>
           <pointsize>11</pointsize>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>

@@ -18,6 +18,7 @@ endif()
 
 
 
+
 # SET(CMAKE_BUILD_TYPE "Debug")
 
 # set(CMAKE_PREFIX_PATH "DRIVER/CAMERA/lib/qt5/bin")
@@ -117,7 +118,7 @@ ament_target_dependencies(${PROJECT_NAME}_node
         "rclcpp"
         "std_msgs"
         "sensor_msgs"
-        "cv_bridge"
+       "cv_bridge"
         "sys_msgs"
         )
 

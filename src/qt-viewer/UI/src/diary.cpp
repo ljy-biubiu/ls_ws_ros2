@@ -9,11 +9,11 @@ Diary::Diary(QWidget *parent) : QWidget(parent),
 {
     ui->setupUi(this);
 
-    // 设置背景黑色
-    QPalette palBackGround(this->palette());
-    palBackGround.setColor(QPalette::Background, QColor(34, 34, 34));
-    this->setAutoFillBackground(true);
-    this->setPalette(palBackGround);
+//    // 设置背景黑色
+//    QPalette palBackGround(this->palette());
+//    palBackGround.setColor(QPalette::Background, QColor(34, 34, 34));
+//    this->setAutoFillBackground(true);
+//    this->setPalette(palBackGround);
 
     TableWidget = new QTableWidget();
 

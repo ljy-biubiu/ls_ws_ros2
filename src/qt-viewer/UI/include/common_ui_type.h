@@ -22,6 +22,23 @@ typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
 
 
+/*************CAMERA UI*****************/
+
+enum CameraViewNub
+{
+  CameraViewFir= 0,   //首页
+  CameraViewSec = 1,   //次页
+};
+
+enum CameraViewMode
+{
+  CameraViewSolo= 0,   //首页
+  CameraViewMuti = 1,   //次页
+};
+
+/*************CAMERA UI*****************/
+
+
 /*************ALARM UI*****************/
 
 union SystemStatus {

@@ -132,8 +132,8 @@ TaskListUi::TaskListUi(QWidget *parent)
         getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_y[i], "y轴相距(m)"+QString::fromStdString( std::to_string(i)));
         getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_z[i], "z轴相距(m)"+QString::fromStdString( std::to_string(i)));
 
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_picth[i], "Y方向(角度)"+QString::fromStdString( std::to_string(i)));
-        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_roll[i], "X轴方向(角度)"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_picth[i], "X方向(角度)"+QString::fromStdString( std::to_string(i)));
+        getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_roll[i], "Y轴方向(角度)"+QString::fromStdString( std::to_string(i)));
         getQLineEditItem(mainTreeWidget, lidarParams_1, LM_line_edit_lidar_yaw[i], "Z轴方向(角度)"+QString::fromStdString( std::to_string(i)));
 
         //        mainTreeWidget->
@@ -291,15 +291,24 @@ TaskListUi::TaskListUi(QWidget *parent)
 
     mainLayout_H->addWidget(comfire_button);
 
+    initConnect();
+
 }
 
+
+void TaskListUi::initConnect()
+{
+//    connect(this->)
+//    block_camera_mode.toggled.connect(my_slot_function);
+
+//    connect(block_camera_mode,&QButtonGroup,[&](bool){qDebug()<<"device=="<<device;});
+}
 
 
 QString getJsonData(Json::Value json_value,std::string fir,std::string last,int trm = 0)
 {
     if(json_value.isNull())
     {
-        qCritical()<<"解析"<<QString::fromStdString(fir)<<" "<<QString::fromStdString(last)<<" json数据失败！";
         return QString();
     }
     else {
@@ -346,14 +355,15 @@ void TaskListUi::updateTopicParams(QString msg)
     RB_line_show_velocity->setChecked(std::stoi( getJsonData(parameter_server,"show","is_show_velocit").toStdString()));
     LM_line_show_box_size->setText(getJsonData( parameter_server,"show","show_box_size"));
 
-    if(std::stoi( getJsonData(parameter_server,"show","camera_mode").toStdString())==1)
-    {
-        multi_camera->setChecked(true);
-    }
-    else
-    {
-        solo_camera->setChecked(true);
-    }
+
+     if(getJsonData(parameter_server,"show","camera_mode").toStdString()=="1")
+     {
+         multi_camera->setChecked(true);
+     }
+     else
+     {
+         solo_camera->setChecked(true);
+     }
 
     //preprocessor
     LM_line_Area_height_down->setText(getJsonData( parameter_server,"preprocessor","Area_height_down",8));

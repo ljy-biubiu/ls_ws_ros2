@@ -3,21 +3,18 @@
 #include <QImage>
 #include <QPixmap>
 
-CameraViewer::CameraViewer(QWidget *parent) :
-    QWidget(parent),
+CameraViewer::CameraViewer(int num, QWidget *parent ) :  QWidget(parent), num_(num),
     ui(new Ui::CameraViewer)
 {
     ui->setupUi(this);
-    my_label = new QLabel(this);
-    ui->verticalLayout_2->addWidget(my_label);
-//    this->show_widget;
-//    ui->show_widget->
-//    setStyleSheet( "QWidget{ background-color : rgba( 160, 160, 160, 255); border-radius : 7px;  }" );
-//    QLabel *label = new QLabel(this);
-//    QHBoxLayout *layout = new QHBoxLayout();
-//    label->setText("Random String");
-//    layout->addWidget(label);
-//    setLayout(layout);
+    ui->mainWidget_left->setHidden(true);
+    ui->mainWidget_right->setHidden(false);
+
+    my_labels.push_back(ui->label_muti_1);
+    my_labels.push_back(ui->label_muti_2);
+    my_labels.push_back(ui->label_muti_3);
+    my_labels.push_back(ui->label_muti_4);
+
 }
 
 
@@ -53,18 +50,50 @@ QImage CameraViewer::MatToQImage(cv::Mat &mtx)
 }
 
 
+
+void CameraViewer::setViewerMode(int mode_type)
+{
+    camera_show_mode = mode_type;
+    if(mode_type == CameraViewMode::CameraViewSolo)
+    {
+        ui->mainWidget_left->setHidden(true);
+        ui->mainWidget_right->setHidden(false);
+    }
+    else
+    {
+        ui->mainWidget_left->setHidden(false);
+        ui->mainWidget_right->setHidden(true);
+    }
+
+    qDebug()<<"mode_type:"<<mode_type;
+}
+
 void CameraViewer::setCameraMat(cv::Mat &msg)
 {
-//    //ui->my_label2->autoFillBackground();
-//    QImage image_tmp = MatToQImage(msg);
-//    image_tmp = image_tmp.scaled(my_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-//    my_label->setPixmap(QPixmap::fromImage(image_tmp));
 }
 
 void CameraViewer::setCameraMat(QPixmap msg ,QString name)
 {
-//    msg.scaled(600,300);
-    my_label->setPixmap(msg.scaled(my_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation)); //16/9
+    if(this->input_num != this->num_)
+        return;
+
+    ui->solo_label->setPixmap(msg.scaled(ui->solo_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    return;
+
+//    qDebug()<<"name:"<<name;
+    if(camera_show_mode == CameraViewMode::CameraViewSolo  )
+    {
+        if(name == "camera_0")
+            ui->solo_label->setPixmap(msg.scaled(ui->solo_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    }
+    else if(camera_show_mode == CameraViewMode::CameraViewMuti)
+    {
+        for(int i{0};my_labels.size()>i ;i++)
+        {
+            if(name.toStdString() == ("camera_"+std::to_string(i+1)))
+                my_labels[i]->setPixmap(msg.scaled(my_labels[i]->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        }
+    }
 }
 
 CameraViewer::~CameraViewer()

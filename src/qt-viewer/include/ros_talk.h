@@ -128,7 +128,7 @@ private:
     std::shared_ptr<rclcpp::Node> node;
     AlarmStatus alarm_status;
     std::string soft_name_;
-    const int camera_numb{4};
+    const int camera_numb{5};
     std::vector<rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr> camera_drive_subs;
 
 signals:

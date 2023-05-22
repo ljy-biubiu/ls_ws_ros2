@@ -68,8 +68,8 @@ void RosTalk::init()
         { to_d_area_Callback(msg); });
 
     camera_drive_sub = node->create_subscription<sensor_msgs::msg::Image>(
-        "/carama_driver/image00",
-        rclcpp::QoS{1}.transient_local(),
+        "/algorithm/imgae",
+        rclcpp::QoS{1},
         [this](const sensor_msgs::msg::Image::SharedPtr msg)
         { camera_drive_imgae_callback(msg); });
 
@@ -78,14 +78,14 @@ void RosTalk::init()
         camera_drive_subs.push_back(
             node->create_subscription<sensor_msgs::msg::Image>(
                 "/carama_driver/image" + std::to_string(i),
-                rclcpp::QoS{1}.transient_local(),
+                rclcpp::QoS{1},
                 [&](const sensor_msgs::msg::Image::SharedPtr msg)
                 { camera_drive_imgae_callback(msg); }));
     }
 
     lidar_drive_sub = node->create_subscription<sensor_msgs::msg::PointCloud2>(
         "/lidar_driver/lidar_driver",
-        rclcpp::QoS{1}.transient_local(),
+        rclcpp::QoS{1},
         [this](const sensor_msgs::msg::PointCloud2::SharedPtr msg)
         { lidar_driver_callback(msg); });
 
@@ -100,7 +100,6 @@ void RosTalk::init()
         rclcpp::QoS{10},
         [this](const std_msgs::msg::String::SharedPtr msg)
         { log_callback(msg); });
-
 
     monitor_node_sub_ = node->create_subscription<sys_msgs::msg::GeneralTableArray>(
         "/monitor/node_alive",
@@ -119,12 +118,11 @@ void RosTalk::init()
     timer_ =
         node->create_wall_timer(100ms, std::bind(&RosTalk::timerCallback, this));
 
-    this->start();
+    //    this->start();
 }
 
 void RosTalk::run()
 {
-
     std_msgs::msg::String pub_msg;
     pub_msg.data = "";
     rclcpp::WallRate loop_rate(1000);
@@ -299,18 +297,65 @@ void RosTalk::lidar_driver_callback(const sensor_msgs::msg::PointCloud2::SharedP
 void RosTalk::camera_drive_imgae_callback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
 
-    auto cvToQpixmap = [&](const sensor_msgs::msg::Image::SharedPtr msg)
-    {
-        QImage::Format format;
-        format = QImage::Format_RGB888;
-        cv_bridge::CvImagePtr cv_ptr;
-        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-        uchar *uchar_iamge_data = cv_ptr->image.data;
-        QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
-        return showImage;
-    };
+    //    auto cvToQpixmap = [&](const sensor_msgs::msg::Image::SharedPtr msg)
+    //    {
+    //        QImage::Format format;
+    //        format = QImage::Format_RGB888;
+    //        cv_bridge::CvImagePtr cv_ptr;
+    //        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+    //        uchar *uchar_iamge_data = cv_ptr->image.data;
+    //        QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
+    //        return showImage;
+    //    };
 
-    emit emit_camera_drive(cvToQpixmap(msg),QString::fromStdString(msg->header.frame_id));
+    try
+    {
+        int width = msg->width;
+        int height = msg->height;
+        std::vector<uint8_t> image_data = msg->data;
+
+        cv::Mat cv_image(height, width, CV_8UC3);
+        std::memcpy(cv_image.data, image_data.data(), image_data.size());
+
+        cv::cvtColor(cv_image, cv_image, cv::COLOR_BGR2RGB);                               // 将颜色空间转换为 RGB
+        QImage qimage(cv_image.data, cv_image.cols, cv_image.rows, QImage::Format_RGB888); // 创建 QImage 对象
+        QPixmap pixmap = QPixmap::fromImage(qimage);                                       // 转换为 QPixmap
+
+        emit emit_camera_drive(pixmap, QString::fromStdString(msg->header.frame_id));
+
+        //
+        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+    }
+    catch (const cv::Exception &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
+    // int width = msg->width;
+    // int height = msg->height;
+    // std::vector<uint8_t> image_data = msg->data;
+
+    // cv::Mat cv_image(height, width, CV_8UC3);
+    // std::memcpy(cv_image.data, image_data.data(), image_data.size());
+
+    // cv::cvtColor(cv_image, cv_image, cv::COLOR_BGR2RGB);                               // 将颜色空间转换为 RGB
+    // QImage qimage(cv_image.data, cv_image.cols, cv_image.rows, QImage::Format_RGB888); // 创建 QImage 对象
+    // QPixmap pixmap = QPixmap::fromImage(qimage);                                       // 转换为 QPixmap
+
+    // emit emit_camera_drive(pixmap, QString::fromStdString(msg->header.frame_id));
+
+    // //
+    // cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+
+    //    std::cout<<"===================888888888888======================="<<std::endl;
+    //    QImage::Format format;
+    //    format = QImage::Format_RGB888;
+    //   cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+    //    uchar *uchar_iamge_data = cv_ptr->image.data;
+    //    QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
+
+    //    std::cout<<"===================111233435======================="<<std::endl;
+    //    auto sdas = cvToQpixmap(msg);
 }
 
 void RosTalk::parameterServerCallback(const std_msgs::msg::String::SharedPtr msg)
