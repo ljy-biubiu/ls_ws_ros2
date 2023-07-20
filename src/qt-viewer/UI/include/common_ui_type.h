@@ -17,73 +17,117 @@
 #define L_Range 10000
 #define Coord_proportion (L_Range * 2.0 / 1000)
 
-typedef pcl::PointXYZRGBA PointT;
+typedef pcl::PointXYZI PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT>::Ptr PointCloudTPtr;
-
 
 /*************CAMERA UI*****************/
 
 enum CameraViewNub
 {
-  CameraViewFir= 0,   //首页
-  CameraViewSec = 1,   //次页
+    CameraViewFir = 0, // 首页
+    CameraViewSec = 1, // 次页
 };
 
 enum CameraViewMode
 {
-  CameraViewSolo= 0,   //首页
-  CameraViewMuti = 1,   //次页
+    CameraViewSolo = 0, //
+    CameraViewMuti = 1, //
+};
+
+enum CameraTypeMode
+{
+    CameratypeOrignal = 0,   //
+    CameratypeAlgorithm = 1, //
+};
+
+enum CameraControlEnum
+{
+    CameraControlUpOn = 0,        //
+    CameraControlButtomOn = 1,    //
+    CameraControlLeftOn = 2,      //
+    CameraControlRightOn = 3,     //
+    CameraControlZoomInOn = 4,    //
+    CameraControlZoomOutOn = 5,   //
+    CameraControlFucosInOn = 6,   //
+    CameraControlFuconsOutOn = 7, //
+    CameraControlIrisInOn = 8,    //
+    CameraControlIrisOutOn = 9,   //
+
+    CameraControlUpOff = 10,        //
+    CameraControlButtomOff = 11,    //
+    CameraControlLeftOff = 12,      //
+    CameraControlRightOff = 13,     //
+    CameraControlZoomInOff = 14,    //
+    CameraControlZoomOutOff = 15,   //
+    CameraControlFucosInOff = 16,   //
+    CameraControlFuconsOutOff = 17, //
+    CameraControlIrisInOff = 18,    //
+    CameraControlIrisOutOff = 19,   //
 };
 
 /*************CAMERA UI*****************/
 
+/*************LIDAR UI*****************/
+enum LidarTypeMode
+{
+    LidartypeOrignal = 0,   //
+    LidartypeAlgorithm = 1, //
+};
+/*************LIDAR UI*****************/
 
 /*************ALARM UI*****************/
 
-union SystemStatus {
+union SystemStatus
+{
     uint8_t data{255};
-    struct {
-        uint8_t localizer: 1; // 1:已定位 0： 未定位
-        uint8_t unused1: 1;
-        uint8_t unused2: 1;
-        uint8_t unused3: 1;
-        uint8_t unused4: 1;
-        uint8_t unused5: 1;
-        uint8_t unused6: 1;
-        uint8_t unused7: 1;
+    struct
+    {
+        uint8_t localizer : 1; // 1:已定位 0： 未定位
+        uint8_t unused1 : 1;
+        uint8_t unused2 : 1;
+        uint8_t unused3 : 1;
+        uint8_t unused4 : 1;
+        uint8_t unused5 : 1;
+        uint8_t unused6 : 1;
+        uint8_t unused7 : 1;
     } bits;
 };
 
-union WorkStatus {
+union WorkStatus
+{
     uint8_t data{255};
-    struct {
-        uint8_t localizer: 1; // 1:已定位 0： 未定位
-        uint8_t unused1: 1;
-        uint8_t unused2: 1;
-        uint8_t unused3: 1;
-        uint8_t unused4: 1;
-        uint8_t unused5: 1;
-        uint8_t unused6: 1;
-        uint8_t unused7: 1;
+    struct
+    {
+        uint8_t localizer : 1; // 1:已定位 0： 未定位
+        uint8_t unused1 : 1;
+        uint8_t unused2 : 1;
+        uint8_t unused3 : 1;
+        uint8_t unused4 : 1;
+        uint8_t unused5 : 1;
+        uint8_t unused6 : 1;
+        uint8_t unused7 : 1;
     } bits;
 };
 
-union CommunicateStatus {
+union CommunicateStatus
+{
     uint8_t data{255};
-    struct {
-        uint8_t camera: 1; // 1:已定位 0： 未定位
-        uint8_t lidar_drive: 1;
-        uint8_t plc: 1;
-        uint8_t unused3: 1;
-        uint8_t unused4: 1;
-        uint8_t unused5: 1;
-        uint8_t unused6: 1;
-        uint8_t unused7: 1;
+    struct
+    {
+        uint8_t camera : 1; // 1:已定位 0： 未定位
+        uint8_t lidar_drive : 1;
+        uint8_t plc : 1;
+        uint8_t unused3 : 1;
+        uint8_t unused4 : 1;
+        uint8_t unused5 : 1;
+        uint8_t unused6 : 1;
+        uint8_t unused7 : 1;
     } bits;
 };
 
-struct AlarmStatus {
+struct AlarmStatus
+{
     SystemStatus system_status;
     WorkStatus work_status;
     CommunicateStatus communicate_status;
@@ -91,17 +135,16 @@ struct AlarmStatus {
 
 struct LEDSTATUS
 {
-    int communicion_led_color[2]= {5,5};
-    int work_led_color[2]= {5,5};
-    int system_led_color[2]= {5,5};
-    int other_led_color[2]= {5,5};
+    int communicion_led_color[2] = {5, 5};
+    int work_led_color[2] = {5, 5};
+    int system_led_color[2] = {5, 5};
+    int other_led_color[2] = {5, 5};
 };
 /*************ALARM UI*****************/
 
-
 struct war
 {
-    pcl::PointXYZ point;
+    pcl::PointXYZI point;
     int dist;
     float angle;
     int index;
@@ -129,12 +172,11 @@ struct Area
     float Obstacle_times;
     float Area_height_down;
     float Area_height_top;
-    QList<PointT> Area2D_point;   // 二维绘图坐标
-    QList<PointT> Area2D_point_T; // 二维真实坐标
-    QList<QList<Box_Cloud>> des_list;       // 三维绘图的坐标
+    QList<pcl::PointXYZI> Area2D_point;   // 二维绘图坐标
+    QList<pcl::PointXYZI> Area2D_point_T; // 二维真实坐标
+    QList<QList<Box_Cloud>> des_list;     // 三维绘图的坐标
 };
 Q_DECLARE_METATYPE(Area)
-
 
 struct point_angle
 {
@@ -154,7 +196,7 @@ struct lidar
     float angle_ver;
 
     QList<QPointF> Polygon[AREAS]; //
-    QList<QPointF> inPolygon;  //
+    QList<QPointF> inPolygon;      //
 };
 Q_DECLARE_METATYPE(lidar)
 
@@ -231,7 +273,6 @@ struct point_column
     float z_max;
 };
 
-
 struct LidarData
 {
     std::vector<float> angle;
@@ -267,7 +308,7 @@ struct LidarPara
 {
     QString IP;
     int port;
-    pcl::PointXYZ base;
+    pcl::PointXYZI base;
     int heart;
     bool connectstate;
 };
@@ -275,9 +316,9 @@ Q_DECLARE_METATYPE(LidarPara)
 
 struct Boxcloud
 {
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr boxcloud1;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr boxcloud2;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr boxcloud3;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr boxcloud1;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr boxcloud2;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr boxcloud3;
 };
 #endif
 struct lidarCloud
@@ -293,7 +334,7 @@ struct lidarIntruder
 {
     QString ip;
     int port;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr tCloud;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr tCloud;
     bool war_alarm[3];
 };
 #endif

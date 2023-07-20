@@ -25,11 +25,15 @@ MainTitleBar::~MainTitleBar()
     delete ui;
 }
 
+#include <cstdlib>
+
 void MainTitleBar::on_pushButtonClose_clicked()
 {
     if(parentWidget)
     {
-        parentWidget->close();
+        system("tmux kill-session -t ros2_ws");
+        // parentWidget->close();
+
     }
 }
 

@@ -21,6 +21,8 @@
 #include "uWS.h"
 #include "rclcpp/rclcpp.hpp"
 
+#define MAX_BUFFERED_AMOUNT 1024 * 1024 * 100
+
 namespace websocket
 {
   using std::chrono::milliseconds;
@@ -100,10 +102,15 @@ namespace websocket
 
       for (auto c : _connections)
       {
+        // if (c->getBufferedAmount() <= MAX_BUFFERED_AMOUNT)
+        // {
+        //   // this.ws.send(buffer, true)
+        //   c->send(protocol.c_str(), protocol.size(), uWS::OpCode::TEXT);
+        // }
+        // std::cout << "c->getBufferedAmount()" << c->getBufferedAmount() << std::endl;
+        // std::cout << "protocol.size()" << protocol.size() << std::endl;
         c->send(protocol.c_str(), protocol.size(), uWS::OpCode::TEXT);
-        //std::cout << "11111111111111111" << std::endl;
-        // c->send(protocol.c_str(), protocol.size(), uWS::OpCode::BINARY);
-        //   std::cout << "222222222222" << std::endl;
+        //  c->send(protocol.c_str(), protocol.size(), uWS::OpCode::BINARY);
       }
 
       // connetion_->send(protocol.c_str(), protocol.size(), uWS::OpCode::BINARY);

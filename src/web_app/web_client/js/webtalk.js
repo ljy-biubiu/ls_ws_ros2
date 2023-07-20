@@ -6,7 +6,7 @@ var receive_lidar_data;
 var receive_params_data;
 
 $(function () {
-    ws = new WebSocket("ws://127.0.0.1:3001");
+    ws = new WebSocket("ws://192.168.44.166:3001");
 
     ws.onopen = function () {
         console.log('onopen');

@@ -1,4 +1,5 @@
 #include "ros_talk.h"
+#include <chrono>
 
 //--------------------------------------
 using std::placeholders::_1;
@@ -10,7 +11,6 @@ RosTalk::~RosTalk() = default;
 
 void RosTalk::init()
 {
-
     int argc = 0;
     char **argv = NULL;
     rclcpp::init(argc, argv);
@@ -26,14 +26,8 @@ void RosTalk::init()
 
     // RCLCPP_INFO_STREAM(this->get_logger(), "qtviewer init");
     //  发布话题
-    //  parameter_server_pub_ = this->create_publisher<std_msgs::msg::String>(
-    //      "/params_config/parameter_server", rclcpp::QoS{1}.transient_local());
-
-    //    parameter_server_pub_ =
-    //            node->create_publisher<std_msgs::msg::String>("/params_config/parameter_server", rclcpp::QoS{1}.transient_local());
-
     save_param_pub_ =
-        node->create_publisher<std_msgs::msg::String>("/qt_viewer/save_params", rclcpp::QoS{1}.transient_local());
+        node->create_publisher<std_msgs::msg::String>("/params_config/save_params", rclcpp::QoS{1}.transient_local());
 
     to_d_area_pub_ =
         node->create_publisher<sys_msgs::msg::ToDArea>("/qt_viewer/area_points", rclcpp::QoS{1}.transient_local());
@@ -46,6 +40,9 @@ void RosTalk::init()
 
     save_point_cloud_pub_ = node->create_publisher<std_msgs::msg::Int8MultiArray>(
         "/qt_viewer/save_point_cloud", rclcpp::QoS{1}.durability_volatile());
+
+    camera_control_cmd_pub = node->create_publisher<std_msgs::msg::Int8>(
+        "/qt_viewer/camera_control_cmd", rclcpp::QoS{10});
 
     // 订阅话题
     // parameter_server_sub = this->create_subscription<std_msgs::msg::String>(
@@ -62,14 +59,20 @@ void RosTalk::init()
         { parameterServerCallback(msg); });
 
     to_d_area_sub = node->create_subscription<sys_msgs::msg::ToDArea>(
-        "/algorithm/area_points",
+        "/params_config/area_points",
         rclcpp::QoS{1}.transient_local(),
         [this](const sys_msgs::msg::ToDArea::SharedPtr msg)
         { to_d_area_Callback(msg); });
 
+    // camera_drive_sub_test = node->create_subscription<sensor_msgs::msg::Image>(
+    //     "/carama_driver/image0",
+    //     rclcpp::QoS{1}.best_effort(),
+    //     [this](const sensor_msgs::msg::Image::SharedPtr msg)
+    //     { camera_drive_imgae_callback(msg); });
+
     camera_drive_sub = node->create_subscription<sensor_msgs::msg::Image>(
         "/algorithm/imgae",
-        rclcpp::QoS{1},
+        rclcpp::QoS{1}.best_effort(),
         [this](const sensor_msgs::msg::Image::SharedPtr msg)
         { camera_drive_imgae_callback(msg); });
 
@@ -78,16 +81,16 @@ void RosTalk::init()
         camera_drive_subs.push_back(
             node->create_subscription<sensor_msgs::msg::Image>(
                 "/carama_driver/image" + std::to_string(i),
-                rclcpp::QoS{1},
+                rclcpp::QoS{1}.best_effort(),
                 [&](const sensor_msgs::msg::Image::SharedPtr msg)
                 { camera_drive_imgae_callback(msg); }));
     }
 
-    lidar_drive_sub = node->create_subscription<sensor_msgs::msg::PointCloud2>(
-        "/lidar_driver/lidar_driver",
-        rclcpp::QoS{1},
-        [this](const sensor_msgs::msg::PointCloud2::SharedPtr msg)
-        { lidar_driver_callback(msg); });
+    // lidar_drive_sub = node->create_subscription<sensor_msgs::msg::PointCloud2>(
+    //     "/lslidar_1/lslidar_point_cloud",
+    //     rclcpp::QoS{1},
+    //     [this](const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+    //     { lidar_driver_callback(msg); });
 
     algorithm_data_sub = node->create_subscription<sys_msgs::msg::DectData>(
         "/algorithm/perception_data",
@@ -118,7 +121,14 @@ void RosTalk::init()
     timer_ =
         node->create_wall_timer(100ms, std::bind(&RosTalk::timerCallback, this));
 
-    //    this->start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // this->start();
+
+    // 解绑话题
+    // camera_drive_sub_test = nullptr;
+
+    start_t = std::chrono::steady_clock::now();
+    end_t = std::chrono::steady_clock::now();
 }
 
 void RosTalk::run()
@@ -132,6 +142,45 @@ void RosTalk::run()
         loop_rate.sleep();
     }
     rclcpp::shutdown();
+}
+
+
+void RosTalk::setLidarTypeMode(int msg)
+{
+    if (msg == LidarTypeMode::LidartypeOrignal)
+    {
+        algorithm_data_sub = nullptr;
+        lidar_drive_sub = node->create_subscription<sensor_msgs::msg::PointCloud2>(
+            "/lslidar_1/lslidar_point_cloud",
+            rclcpp::QoS{1},
+            [this](const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+            { lidar_driver_callback(msg); });
+    }
+    else if (msg == LidarTypeMode::LidartypeAlgorithm)
+    {
+        lidar_drive_sub = nullptr;
+        algorithm_data_sub = node->create_subscription<sys_msgs::msg::DectData>(
+            "/algorithm/perception_data",
+            rclcpp::QoS{1},
+            [this](const sys_msgs::msg::DectData::SharedPtr msg)
+            { decct_data_callback(msg); });
+    }
+    else
+    {
+        RCLCPP_INFO(node->get_logger(), " error params setLidarTypeMode ");
+    }
+}
+
+void RosTalk::setCameraTypeMode(int msg)
+{
+    camera_type_mode = (CameraTypeMode)msg;
+}
+
+void RosTalk::setCameraControlCmd(int msg)
+{
+    std_msgs::msg::Int8 cmd;
+    cmd.data = msg;
+    camera_control_cmd_pub->publish(cmd);
 }
 
 void RosTalk::save_point_cloud(int msg)
@@ -207,6 +256,7 @@ void RosTalk::monitor_node_callback(const sys_msgs::msg::GeneralTableArray::Shar
 void RosTalk::to_d_area_Callback(const sys_msgs::msg::ToDArea::SharedPtr &msg)
 {
     std::cout << "to_d_area_Callback" << std::endl;
+
     QList<QList<PointT>> qt_msg;
 
     for (auto dat_top : msg->area)
@@ -239,10 +289,40 @@ void RosTalk::saveLidarDatas(QString msg)
 
 void RosTalk::decct_data_callback(const sys_msgs::msg::DectData::SharedPtr &msg)
 {
-    // std::cout << "decct_data_callback " << std::endl;
+    auto PointCouldrosTopcl = [&]()
+    {
+        PointCloudTPtr cloudPtr(new PointCloudT);
+        // Get the field structure of this point cloud
+        int pointBytes = msg->origin_cloud.point_step;
+        int offset_x, offset_y, offset_z, offset_int;
+        for (int f = 0; f < msg->origin_cloud.fields.size(); ++f)
+        {
+            if (msg->origin_cloud.fields[f].name == "x")
+                offset_x = msg->origin_cloud.fields[f].offset;
+            if (msg->origin_cloud.fields[f].name == "y")
+                offset_y = msg->origin_cloud.fields[f].offset;
+            if (msg->origin_cloud.fields[f].name == "z")
+                offset_z = msg->origin_cloud.fields[f].offset;
+            if (msg->origin_cloud.fields[f].name == "intensity")
+                offset_int = msg->origin_cloud.fields[f].offset;
+        }
+
+        // populate point cloud object
+        for (int p = 0; p < msg->origin_cloud.width; ++p)
+        {
+            pcl::PointXYZI newPoint;
+            newPoint.x = *(float *)(&msg->origin_cloud.data[0] + (pointBytes * p) + offset_x);
+            newPoint.y = *(float *)(&msg->origin_cloud.data[0] + (pointBytes * p) + offset_y);
+            newPoint.z = *(float *)(&msg->origin_cloud.data[0] + (pointBytes * p) + offset_z);
+            newPoint.intensity = *(unsigned char *)(&msg->origin_cloud.data[0] + (pointBytes * p) + offset_int);
+            cloudPtr->points.push_back(newPoint);
+        }
+        return cloudPtr;
+    };
 
     auto cloud = boost::make_shared<PointCloudT>();
-    pcl::fromROSMsg(msg->origin_cloud, *cloud);
+    // pcl::fromROSMsg(msg->origin_cloud, *cloud);
+    cloud = PointCouldrosTopcl();
 
     DectData dect_data;
     *dect_data.Origin_Cloud = *cloud;
@@ -284,83 +364,100 @@ void RosTalk::log_callback(const std_msgs::msg::String::SharedPtr &msg)
 
 void RosTalk::lidar_driver_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
 {
+
+    end_t = std::chrono::steady_clock::now();                                              // 记录定时器结束时间
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_t - start_t); // 计算执行时间
+    std::cout << "雷达驱动数据显示的周期时间:" << elapsed.count() << " ms" << std::endl;
+    start_t = std::chrono::steady_clock::now(); // 记录定时器开始时间
+
     auto cloud =
         boost::make_shared<PointCloudT>();
     pcl::fromROSMsg(*msg, *cloud);
     emit emit_lidar_drive(cloud);
-    // std::cout << "wwwwwwwwwww" << std::endl;
-    //  RCLCPP_INFO(this->get_logger(), "points_size(%d,%d)", msg->height, msg->width);
 };
 
 // PointCloudTPtr
 
+// Convert sensor_msgs::Image to cv::Mat
+cv::Mat rosImgToCv(const sensor_msgs::msg::Image::SharedPtr msg)
+{
+    cv_bridge::CvImageConstPtr cv_ptr;
+    try
+    {
+        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (const cv_bridge::Exception &e)
+    {
+        fprintf(stderr, "cv_bridge exception: %s", e.what());
+        return cv::Mat();
+    }
+    return cv_ptr->image;
+}
+
+QPixmap matToPixmap(const cv::Mat &mat)
+{
+    QImage image(mat.data,
+                 mat.cols, mat.rows,
+                 static_cast<int>(mat.step),
+                 QImage::Format_RGB888);
+    return QPixmap::fromImage(image.rgbSwapped());
+}
+
 void RosTalk::camera_drive_imgae_callback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
 
-    //    auto cvToQpixmap = [&](const sensor_msgs::msg::Image::SharedPtr msg)
-    //    {
-    //        QImage::Format format;
-    //        format = QImage::Format_RGB888;
-    //        cv_bridge::CvImagePtr cv_ptr;
-    //        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-    //        uchar *uchar_iamge_data = cv_ptr->image.data;
-    //        QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
-    //        return showImage;
-    //    };
+    std::cout << "camera_drive_imgae_callback<<" << std::endl;
 
-    try
+    auto start_time = std::chrono::steady_clock::now();
+
+    auto cvToQpixmap = [&](const sensor_msgs::msg::Image::SharedPtr msg)
     {
-        int width = msg->width;
-        int height = msg->height;
-        std::vector<uint8_t> image_data = msg->data;
+        try
+        {
+            int width = msg->width;
+            int height = msg->height;
+            std::vector<uint8_t> image_data = msg->data;
 
-        cv::Mat cv_image(height, width, CV_8UC3);
-        std::memcpy(cv_image.data, image_data.data(), image_data.size());
+            cv::Mat cv_image(height, width, CV_8UC3);
+            std::memcpy(cv_image.data, image_data.data(), image_data.size());
 
-        cv::cvtColor(cv_image, cv_image, cv::COLOR_BGR2RGB);                               // 将颜色空间转换为 RGB
-        QImage qimage(cv_image.data, cv_image.cols, cv_image.rows, QImage::Format_RGB888); // 创建 QImage 对象
-        QPixmap pixmap = QPixmap::fromImage(qimage);                                       // 转换为 QPixmap
+            cv::cvtColor(cv_image, cv_image, cv::COLOR_BGR2RGB);                               // 将颜色空间转换为 RGB
+            QImage qimage(cv_image.data, cv_image.cols, cv_image.rows, QImage::Format_RGB888); // 创建 QImage 对象
+            QPixmap pixmap = QPixmap::fromImage(qimage);                                       // 转换为 QPixmap
 
-        emit emit_camera_drive(pixmap, QString::fromStdString(msg->header.frame_id));
+            emit emit_camera_drive(pixmap, QString::fromStdString(msg->header.frame_id));
+        }
+        catch (const cv::Exception &e)
+        {
+            std::cerr << e.what() << "读取相机驱动失败！！！！！" << '\n';
+        }
+    };
 
-        //
-        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-    }
-    catch (const cv::Exception &e)
+    if (camera_type_mode == CameraTypeMode::CameratypeOrignal)
     {
-        std::cerr << e.what() << '\n';
+        if (msg->header.frame_id.substr(msg->header.frame_id.length() - 6) != "worked")
+        {
+            // cvToQpixmap(msg);
+            emit emit_camera_drive(matToPixmap(rosImgToCv(msg)), QString::fromStdString(msg->header.frame_id));
+        }
+    }
+    else if (camera_type_mode == CameraTypeMode::CameratypeAlgorithm)
+    {
+        if (msg->header.frame_id.substr(msg->header.frame_id.length() - 6) == "worked")
+        {
+            // cvToQpixmap(msg);
+            emit emit_camera_drive(matToPixmap(rosImgToCv(msg)), QString::fromStdString(msg->header.frame_id));
+        }
     }
 
-    // int width = msg->width;
-    // int height = msg->height;
-    // std::vector<uint8_t> image_data = msg->data;
-
-    // cv::Mat cv_image(height, width, CV_8UC3);
-    // std::memcpy(cv_image.data, image_data.data(), image_data.size());
-
-    // cv::cvtColor(cv_image, cv_image, cv::COLOR_BGR2RGB);                               // 将颜色空间转换为 RGB
-    // QImage qimage(cv_image.data, cv_image.cols, cv_image.rows, QImage::Format_RGB888); // 创建 QImage 对象
-    // QPixmap pixmap = QPixmap::fromImage(qimage);                                       // 转换为 QPixmap
-
-    // emit emit_camera_drive(pixmap, QString::fromStdString(msg->header.frame_id));
-
-    // //
-    // cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-
-    //    std::cout<<"===================888888888888======================="<<std::endl;
-    //    QImage::Format format;
-    //    format = QImage::Format_RGB888;
-    //   cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-    //    uchar *uchar_iamge_data = cv_ptr->image.data;
-    //    QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
-
-    //    std::cout<<"===================111233435======================="<<std::endl;
-    //    auto sdas = cvToQpixmap(msg);
+    auto end_time = std::chrono::steady_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    std::cout << "图像  elapsed time: " << elapsed_time.count() << " ms" << std::endl;
 }
 
 void RosTalk::parameterServerCallback(const std_msgs::msg::String::SharedPtr msg)
 {
-    std::cout << "parameter_server_callback: " << msg->data << std::endl;
+    // std::cout << "parameter_server_callback: " << msg->data << std::endl;
     emit emitTopicParams(QString::fromStdString(msg->data));
 }
 
@@ -436,3 +533,65 @@ void RosTalk::timerCallback()
     //   //std::cout<<"sssssssssssssss"<<std::endl;
     // }
 }
+
+//    //str.substr(str.length() - 8); camera_0_algorithm
+
+//    //    auto cvToQpixmap = [&](const sensor_msgs::msg::Image::SharedPtr msg)
+//    //    {
+//    //        QImage::Format format;
+//    //        format = QImage::Format_RGB888;
+//    //        cv_bridge::CvImagePtr cv_ptr;
+//    //        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+//    //        uchar *uchar_iamge_data = cv_ptr->image.data;
+//    //        QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
+//    //        return showImage;
+//    //    };
+
+//    try
+//    {
+//        int width = msg->width;
+//        int height = msg->height;
+//        std::vector<uint8_t> image_data = msg->data;
+
+//        cv::Mat cv_image(height, width, CV_8UC3);
+//        std::memcpy(cv_image.data, image_data.data(), image_data.size());
+
+//        cv::cvtColor(cv_image, cv_image, cv::COLOR_BGR2RGB);                               // 将颜色空间转换为 RGB
+//        QImage qimage(cv_image.data, cv_image.cols, cv_image.rows, QImage::Format_RGB888); // 创建 QImage 对象
+//        QPixmap pixmap = QPixmap::fromImage(qimage);                                       // 转换为 QPixmap
+
+//        emit emit_camera_drive(pixmap, QString::fromStdString(msg->header.frame_id));
+
+//        //
+//        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+//    }
+//    catch (const cv::Exception &e)
+//    {
+//        std::cerr << e.what() << '\n';
+//    }
+
+//    // int width = msg->width;
+//    // int height = msg->height;
+//    // std::vector<uint8_t> image_data = msg->data;
+
+//    // cv::Mat cv_image(height, width, CV_8UC3);
+//    // std::memcpy(cv_image.data, image_data.data(), image_data.size());
+
+//    // cv::cvtColor(cv_image, cv_image, cv::COLOR_BGR2RGB);                               // 将颜色空间转换为 RGB
+//    // QImage qimage(cv_image.data, cv_image.cols, cv_image.rows, QImage::Format_RGB888); // 创建 QImage 对象
+//    // QPixmap pixmap = QPixmap::fromImage(qimage);                                       // 转换为 QPixmap
+
+//    // emit emit_camera_drive(pixmap, QString::fromStdString(msg->header.frame_id));
+
+//    // //
+//    // cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+
+//    //    std::cout<<"===================888888888888======================="<<std::endl;
+//    //    QImage::Format format;
+//    //    format = QImage::Format_RGB888;
+//    //   cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+//    //    uchar *uchar_iamge_data = cv_ptr->image.data;
+//    //    QPixmap showImage = QPixmap::fromImage(QImage(uchar_iamge_data, msg->width, msg->height, msg->step, format));
+
+//    //    std::cout<<"===================111233435======================="<<std::endl;
+//    //    auto sdas = cvToQpixmap(msg);

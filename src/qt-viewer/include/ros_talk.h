@@ -60,18 +60,19 @@ struct SendObjectInf
 // 最终传出结构体
 struct DectData
 {
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr Origin_Cloud; // 原始点云
-    std::vector<SendObjectInf> Data_vec;                  // 检测出的目标物体数据
-    std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> ObjCloud_vec;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr Origin_Cloud; // 原始点云
+    std::vector<SendObjectInf> Data_vec;               // 检测出的目标物体数据
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> ObjCloud_vec;
 
     DectData()
     {
-        Origin_Cloud.reset(new pcl::PointCloud<pcl::PointXYZRGBA>);
-        // ObjCloud_vec->reset(new pcl::PointCloud<pcl::PointXYZRGBA>);
+        Origin_Cloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
     }
 };
 
 Q_DECLARE_METATYPE(DectData) // 要调用Q_DECLARE_METATYPE，向QT声明这个结构体----***
+
+#include <chrono>
 
 class RosTalk : public QThread
 {
@@ -104,6 +105,7 @@ private:
     // 订阅
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr parameter_server_sub;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr camera_drive_sub;
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr camera_drive_sub_test;
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr lidar_drive_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr log_sub;
     rclcpp::Subscription<sys_msgs::msg::DectData>::SharedPtr algorithm_data_sub;
@@ -118,6 +120,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr heart_keeper_pub_;
     rclcpp::Publisher<sys_msgs::msg::ToDArea>::SharedPtr to_d_area_pub_;
     rclcpp::Publisher<std_msgs::msg::Int8MultiArray>::SharedPtr save_point_cloud_pub_;
+    rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr camera_control_cmd_pub;
     // rclcpp::Publisher<sys_msgs::msg::GeneralTableArray>::SharedPtr save_point_cloud_pub_;
 
     // 定时器
@@ -128,12 +131,16 @@ private:
     std::shared_ptr<rclcpp::Node> node;
     AlarmStatus alarm_status;
     std::string soft_name_;
-    const int camera_numb{5};
+    const int camera_numb{4};
+    CameraTypeMode camera_type_mode{CameraTypeMode::CameratypeOrignal};
     std::vector<rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr> camera_drive_subs;
+
+    std::chrono::steady_clock::time_point start_t;
+    std::chrono::steady_clock::time_point end_t;
 
 signals:
     void emitTopicParams(QString);
-    void emit_camera_drive(QPixmap,QString);
+    void emit_camera_drive(QPixmap, QString);
     void emit_lidar_drive(PointCloudTPtr);
     void emit_show_log(QString);
     void emit_decct_data(DectData);
@@ -147,5 +154,8 @@ private slots:
     void save2dlists(QList<QList<PointT>>);
     void save_point_cloud(int);
     void save_point_backgroud_cloud(int);
+    void setCameraTypeMode(int);
+    void setCameraControlCmd(int);
+    void setLidarTypeMode(int);
 };
 #endif

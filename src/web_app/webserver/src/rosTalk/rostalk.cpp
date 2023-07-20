@@ -64,7 +64,7 @@ void RosTalk::init()
 
   camera_driver_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
       "/carama_driver/image0",
-      rclcpp::QoS{10},
+      rclcpp::QoS{10}.best_effort(),
       [this](const sensor_msgs::msg::Image::SharedPtr msg)
       { camera_driver_callback(msg); });
 
@@ -75,7 +75,7 @@ void RosTalk::init()
       { lidarDatasCallback(msg); });
 
   lidar_drive_sub = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/ch128x1/lslidar_point_cloud",
+      "/lslidar_1/lslidar_point_cloud",
       rclcpp::QoS{1},
       [this](const sensor_msgs::msg::PointCloud2::SharedPtr msg)
       { lidar_driver_callback(msg); });
@@ -135,7 +135,7 @@ void RosTalk::lidar_driver_callback(const sensor_msgs::msg::PointCloud2::SharedP
   for (int i = 0; i < cloud->points.size(); i++)
   {
     // 区域过滤
-    if (abs(cloud->points[i].x) < 40 && abs(cloud->points[i].y) < 40)
+    if (abs(cloud->points[i].x) < 1000 && abs(cloud->points[i].y) < 1000)
     {
       // 数据精度调整
       writer_rap.String(caculate2Bit(cloud->points[i].x).c_str());

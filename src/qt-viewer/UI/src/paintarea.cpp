@@ -49,9 +49,9 @@ PaintArea::PaintArea()/*区域绘图初始化*/
         zmin[i] =0;
 
     }
-    tCloud.reset(new pcl::PointCloud<PointT>);
+    tCloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
 
-    xCloud.reset(new pcl::PointCloud<PointT>);
+    xCloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
 
     for(int i=0;i<AREAS;i++)
     {
@@ -222,7 +222,7 @@ void PaintArea::drawArea(QPainter &painter, int index)
     painter.scale(zoom, zoom);
     for(int i = 0; i < AREAS; i++)
     {//绘制区域
-        QList<PointT> tmp = area[i].Area2D_point;
+        QList<pcl::PointXYZI> tmp = area[i].Area2D_point;
         if(i==0)
             painter.setPen(QPen(Qt::red, 2/zoom));
         else if(i==1)
@@ -317,7 +317,7 @@ void PaintArea::mousePressEvent(QMouseEvent *event)/*鼠标按键事件*/
     if(event->button()== Qt::RightButton)// 右键删除坐标点
     {
         for(int i = 0; i < area[curPolygonPos-1].Area2D_point.size(); i++){// for(int i = 0; i < area[curPolygonPos-1].Area2D_point.size(); i++)
-            PointT p = area[curPolygonPos-1].Area2D_point.at(i);
+            pcl::PointXYZI p = area[curPolygonPos-1].Area2D_point.at(i);
 
             qreal x = p.x*zoom + rx;
             qreal y = p.y*zoom + ry;
@@ -341,7 +341,7 @@ void PaintArea::mousePressEvent(QMouseEvent *event)/*鼠标按键事件*/
         leftsel = true;
         for(int i = 0; i <  area[curPolygonPos-1].Area2D_point.size(); i++)
         {
-            PointT p = area[curPolygonPos-1].Area2D_point.at(i);
+            pcl::PointXYZI p = area[curPolygonPos-1].Area2D_point.at(i);
             qreal x = p.x*zoom + rx;
             qreal y = p.y*zoom + ry;
             if(qAbs(x - event->pos().rx())<5 && qAbs(y - event->pos().ry())< 5)
@@ -377,7 +377,7 @@ void PaintArea::mouseMoveEvent(QMouseEvent *event)/*鼠标移动事件*/
     setCursor(Qt::ArrowCursor);/*设置鼠标样式*/
     for(int i = 0; i < area[curPolygonPos-1].Area2D_point.size(); i++)
     {
-        PointT p = area[curPolygonPos-1].Area2D_point.at(i);
+        pcl::PointXYZI p = area[curPolygonPos-1].Area2D_point.at(i);
         qreal x = p.x*zoom + rx;
         qreal y = p.y*zoom + ry;
         if(qAbs(x - event->pos().rx())<5 && qAbs(y - event->pos().ry())< 5)
@@ -430,8 +430,8 @@ void PaintArea::mouseReleaseEvent(QMouseEvent *event)/*鼠标释放事件*/
         // qDebug()<<"x"<<x<<"y"<<y<<"   curPolygonPos=" <<curPolygonPos;
 
         index = area[curPolygonPos-1].Area2D_point.size();
-        PointT pt,pt_T;
-        pt.x =x;pt.y =y;pt.z=0;pt.r=255;pt.g =0;pt.b=0;
+        pcl::PointXYZI pt,pt_T;
+        pt.x =x;pt.y =y;pt.z=0;
         area[curPolygonPos-1].Area2D_point.insert(index,pt);
 
         pt_T = areapoint2d_transform(pt);
@@ -453,7 +453,7 @@ void PaintArea::mouseReleaseEvent(QMouseEvent *event)/*鼠标释放事件*/
         qreal x = (tmp.rx() - rx)/zoom;
         qreal y = (tmp.ry() - ry)/zoom;
 
-        PointT pt,pt_T;
+        pcl::PointXYZI pt,pt_T;
         pt.x=x;
         pt.y=y;
         pt_T = areapoint2d_transform(pt);
@@ -482,7 +482,7 @@ void PaintArea::mouseReleaseEvent(QMouseEvent *event)/*鼠标释放事件*/
 void PaintArea::mouseDoubleClickEvent(QMouseEvent *event)
 {
     qreal x,y;
-    PointT p2;
+    pcl::PointXYZI p2;
     int tsize;
     if(event->button() == Qt::LeftButton)
     {
@@ -490,7 +490,7 @@ void PaintArea::mouseDoubleClickEvent(QMouseEvent *event)
         qreal ry = centerPoint.ry();
         for(int i = 0; i < area[curPolygonPos-1].Area2D_point.size(); i++)
         {
-            PointT p = area[curPolygonPos-1].Area2D_point.at(i);
+            pcl::PointXYZI p = area[curPolygonPos-1].Area2D_point.at(i);
             qreal x = p.x*zoom + rx;
             qreal y = p.y*zoom + ry;
             if(qAbs(x - event->pos().rx())<5*zoom && qAbs(y - event->pos().ry())< 5*zoom)
@@ -504,8 +504,8 @@ void PaintArea::mouseDoubleClickEvent(QMouseEvent *event)
                 p2 = area[curPolygonPos-1].Area2D_point.at((i+1)%tsize);
                 x = (p2.x + p.x)/2;
                 y = (p2.y + p.y)/2;
-                PointT pt,pt_T;
-                pt.x =x;pt.y =y;pt.z=0;pt.r=255;pt.g =0;pt.b=0;
+                pcl::PointXYZI pt,pt_T;
+                pt.x =x;pt.y =y;pt.z=0;
                 area[curPolygonPos-1].Area2D_point.insert((i+1)%tsize,pt);
                 pt_T =areapoint2d_transform(pt);
                 area[curPolygonPos-1].Area2D_point_T.insert((i+1)%tsize,pt_T);
@@ -535,7 +535,7 @@ void PaintArea::keyPressEvent(QKeyEvent *event) //键盘按下事件
 }
 
 
-QList<PointT> PaintArea::getIndexPoints(int index)
+QList<pcl::PointXYZI> PaintArea::getIndexPoints(int index)
 {
     return area[index-1].Area2D_point;
 }
@@ -571,13 +571,13 @@ void PaintArea::setSplice(int index)
         spliceflag = false;
 }
 
-void PaintArea::updataPoint(int index, QList<PointT> ps)
+void PaintArea::updataPoint(int index, QList<pcl::PointXYZI> ps)
 {
 
     float msx = PAINT_SIZE/2 /LidarInstance.lidar_Radius;
     float msy = PAINT_SIZE/2 /LidarInstance.lidar_Radius;
     area[index-1].Area2D_point_T.clear();
-    PointT point;
+    pcl::PointXYZI point;
     for(int i = 0; i < ps.size(); i++){
         point.x = ps[i].x/msx;
         point.y = ps[i].y/msy*(-1.0);
@@ -596,11 +596,11 @@ void PaintArea::UpdateArea_index(int index)
 }
 
 
-PointT PaintArea::areapoint2d_transform(PointT pt)//绘图坐标系转换到真实坐标系
+pcl::PointXYZI PaintArea::areapoint2d_transform(pcl::PointXYZI pt)//绘图坐标系转换到真实坐标系
 {
     float msx = PAINT_SIZE/2 /LidarInstance.lidar_Radius;
     float msy = PAINT_SIZE/2 /LidarInstance.lidar_Radius;
-    PointT point;
+    pcl::PointXYZI point;
     point.x =pt.x/msx;
     point.y =pt.y/msy*(-1.0);
     return point;
@@ -618,7 +618,7 @@ void PaintArea::areaList_T_transform()//绘图坐标系转换到真实坐标系
         {
             qreal x = area[index].Area2D_point_T[i].x*msx;
             qreal y = area[index].Area2D_point_T[i].y/(-1.0)*msy;
-            PointT point;
+            pcl::PointXYZI point;
             point.x =x;point.y=y;
             area[index].Area2D_point.push_back(point);
         }

@@ -77,21 +77,22 @@ void CameraViewer::setCameraMat(QPixmap msg ,QString name)
     if(this->input_num != this->num_)
         return;
 
-    ui->solo_label->setPixmap(msg.scaled(ui->solo_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
-    return;
+    //    ui->solo_label->setPixmap(msg.scaled(ui->solo_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    //    return;
 
-//    qDebug()<<"name:"<<name;
+    //    qDebug()<<"name:"<<name;
     if(camera_show_mode == CameraViewMode::CameraViewSolo  )
     {
-        if(name == "camera_0")
+        if(name == "camera_0" || name == "camera_0_worked")
             ui->solo_label->setPixmap(msg.scaled(ui->solo_label->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+
     }
     else if(camera_show_mode == CameraViewMode::CameraViewMuti)
     {
         for(int i{0};my_labels.size()>i ;i++)
         {
-            if(name.toStdString() == ("camera_"+std::to_string(i+1)))
-                my_labels[i]->setPixmap(msg.scaled(my_labels[i]->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+            //            if(name.toStdString() == ("camera_"+std::to_string(i)))
+            my_labels[i]->setPixmap(msg.scaled(my_labels[i]->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
         }
     }
 }

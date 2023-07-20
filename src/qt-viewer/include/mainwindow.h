@@ -15,6 +15,7 @@
 #include "webui.h"
 #include "tasklistui.h"
 #include "common_ui_type.h"
+#include "camera_control.h"
 
 
 // Visualization Toolkit (VTK)
@@ -81,6 +82,7 @@ private:
     CameraViewer *camera_viewer2;
     QVTKOpenGLNativeWidget *qvtkOpenglNativeWidget;
     WebUi *web_ui;
+    CameraControl* camera_control;
     MainTitleBar *main_title_bar;
     QTimer *my_timer;
     AddLidar *add_lidar;
@@ -151,6 +153,7 @@ private:
     QAction *save_point_cloud;
     QAction *svae_background_pont_cloud;
     QAction *qt_version;
+    QAction *camera_control_ac;
 
     QSplashScreen *screen;
     TaskListUi* task_list_ui;
@@ -168,6 +171,7 @@ private slots:
     void setAreaDatas(QList<QList<PointT>> msg);
     void save_point_backgourd_cloud_set_Action();
     void save_point_cloud_set_Action();
+    void camera_control_Action();
 
     // void show_log(QString);
 

@@ -1,0 +1,22 @@
+{
+    "Topics": [
+        {
+            "topic": "/carama_driver/imgae",
+            "type": "sensor_msgs::msg::Image",
+            "timeout": 0.3,
+            "enabled": false
+        },
+        {
+            "topic": "/lidar_driver/lidar_driver",
+            "type": "sensor_msgs::msg::PointCloud2",
+            "timeout": 0.3,
+            "enabled": false
+        },
+        {
+            "topic": "/poms_driver/poms_driver",
+            "type": "sys_msgs::msg::Gpfpd",
+            "timeout": 0.3,
+            "enabled": false
+        }
+    ]
+}

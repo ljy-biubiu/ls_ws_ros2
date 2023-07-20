@@ -1,0 +1,4 @@
+/electric_relay_node:
+  ros__parameters: 
+    device_ip: 192.168.1.222                                #继电器 ip
+    device_port: 2368                                       #继电器的端口号

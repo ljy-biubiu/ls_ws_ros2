@@ -43,7 +43,7 @@ find_package(rclcpp REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(PCL 1.9 REQUIRED)
-find_package(RapidJSON)
+# find_package(RapidJSON)
 find_package(std_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 
@@ -58,6 +58,7 @@ include_directories(
   include/utils
   include/threads
   include/websocket
+  # include/rapidjson
   ${PCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS})
   

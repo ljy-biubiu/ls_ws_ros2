@@ -33,12 +33,12 @@ MainWindow::MainWindow(QApplication *my_app_, QWidget *parent)
     this->main_title_bar->setParentWidget(this);
     this->setWindowIcon(QIcon(":/images/leishen.ico"));
 
-    //    /******************************************** 加载启动动画 ********************************************/
-    QPixmap pixmap(":/images/logo.jpg");
-    screen = new QSplashScreen(pixmap);
+    //************************************************** 加载启动动画 ********************************************/
+    screen = new QSplashScreen(QPixmap(":/images/logo.jpg"));
     screen->show();
+    my_app_->processEvents();
 
-    usleep(1000*1000);
+    usleep(1000 * 1000);
     ros_talk->start();
 }
 
@@ -66,19 +66,28 @@ void MainWindow::initObeject()
     add_lidar = new AddLidar();
 
     task_list_ui = new TaskListUi(this);
+    camera_control = new CameraControl();
 }
+
+int lidar_cnt = 0;
 
 void MainWindow::mainEventCallback()
 {
 
     my_timer = new QTimer(this);
-    my_timer->start(100);
+    my_timer->start(1000);
     connect(my_timer, &QTimer::timeout, [=]()
-    {
-        if(paint_area != nullptr && setROI != nullptr)
-        {
-            paint_area_2setROI();
-        } });
+            {
+                if (paint_area != nullptr && setROI != nullptr)
+                {
+                    paint_area_2setROI();
+                }
+
+                std::cout << "==================================" << std::endl;
+                std::cout << "==================================" << std::endl;
+                std::cout << "==================================" << std::endl;
+                std::cout << "lidar_cnt:" << lidar_cnt << std::endl;
+                lidar_cnt = 0; });
 }
 
 void MainWindow::paint_area_2setROI()
@@ -106,57 +115,238 @@ void MainWindow::updateAlgPointCould()
 void MainWindow::updatePointCould()
 {
     //
-    static PointCloudTPtr msg;
-    msg.reset(new PointCloudT);
+    // static PointCloudTPtr msg;
+    // msg.reset(new PointCloudT);
 
-    // this->params_event->getTotalParams().drive.lidar_drive.get_lidar_data(msg);
+    // // this->params_event->getTotalParams().drive.lidar_drive.get_lidar_data(msg);
 
-    paint_area->xCloud->clear();
-    *paint_area->xCloud = *msg;
-    paint_area->update();
+    // paint_area->xCloud->clear();
+    // *paint_area->xCloud = *msg;
+    // paint_area->update();
 
-    std::string name = "All_cloud";
-    this->viewer->removePointCloud(name);
-    this->viewer->addPointCloud(msg, name);
-    this->viewer->updatePointCloud(msg, name);
+    // std::string name = "All_cloud";
+    // this->viewer->removePointCloud(name);
+    // pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> color_handler(msg, "intensity");
+    // this->viewer->addPointCloud(msg, color_handler, name);
+    // this->viewer->updatePointCloud(msg, color_handler, name);
 
-    this->viewer->getRenderWindow()->GetInteractor()->Render();
-    qvtkOpenglNativeWidget->update();
+    // this->viewer->getRenderWindow()->GetInteractor()->Render();
+    // qvtkOpenglNativeWidget->update();
 }
 
 // 0 other
 // 2 AMR
 // 1 people
 
+// void RenderColor(PointCloudTPtr &msg)
+// {
+//     // 计算点云的高度范围
+//     double min_height = std::numeric_limits<double>::max();
+//     double max_height = -std::numeric_limits<double>::max();
+//     for (size_t i = 0; i < msg->points.size(); ++i)
+//     {
+//         if (msg->points[i].z < min_height)
+//         {
+//             min_height = msg->points[i].z;
+//         }
+//         if (msg->points[i].z > max_height)
+//         {
+//             max_height = msg->points[i].z;
+//         }
+//     }
+
+//     // // 设置点云颜色
+//     // for (size_t i = 0; i < msg->points.size(); ++i)
+//     // {
+//     //     // 根据高度信息计算颜色值
+//     //     msg->points[i].r = 0;
+//     //     msg->points[i].g = 100 * (msg->points[i].z - min_height) / (max_height - min_height);
+//     //     msg->points[i].b = 255 * (msg->points[i].z - min_height) / (max_height - min_height); // 使用科技蓝作为主色调
+//     // }
+// }
+
+pcl::PointCloud<pcl::PointXYZRGBA>::Ptr RenderColor(pcl::PointCloud<pcl::PointXYZI>::Ptr msg)
+{
+    int i{0};
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr color_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
+    color_cloud->resize(msg->size());
+
+    for (auto &point : msg->points)
+    {
+        color_cloud->points[i].x = msg->points[i].x;
+        color_cloud->points[i].y = msg->points[i].y;
+        color_cloud->points[i].z = msg->points[i].z;
+        i++;
+    }
+    return color_cloud;
+
+    // // ... 在cloud_input中加载或生成PointXYZI点云数据 ...
+
+    // pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_output(new pcl::PointCloud<pcl::PointXYZRGBA>);
+
+    // // 计算强度的最大值和最小值
+    // float intensity_min = std::numeric_limits<float>::max();
+    // float intensity_max = std::numeric_limits<float>::min();
+
+    // for (const auto &point_i : cloud_input->points)
+    // {
+    //     if (point_i.intensity < intensity_min)
+    //         intensity_min = point_i.intensity;
+
+    //     if (point_i.intensity > intensity_max)
+    //         intensity_max = point_i.intensity;
+    // }
+
+    // // 定义颜色映射范围
+    // uint8_t r_min = 0;   // 最小强度值对应的红色通道值
+    // uint8_t r_max = 255; // 最大强度值对应的红色通道值
+
+    // // 将每个点转换并添加到新的点云中，并给定对应的RGB颜色值
+    // for (const auto &point_i : cloud_input->points)
+    // {
+    //     pcl::PointXYZRGBA point_rgba;
+
+    //     // 设置点的坐标
+    //     point_rgba.x = point_i.x;
+    //     point_rgba.y = point_i.y;
+    //     point_rgba.z = point_i.z;
+
+    //     // 计算强度值在颜色映射范围内的归一化值
+    //     float normalized_intensity = (point_i.intensity - intensity_min) / (intensity_max - intensity_min);
+
+    //     // 根据归一化强度值设置RGB颜色
+    //     point_rgba.r = static_cast<uint8_t>(r_min + normalized_intensity * (r_max - r_min));
+    //     point_rgba.g = 0; // 绿色通道设为0
+    //     point_rgba.b = 0; // 蓝色通道设为0
+
+    //     cloud_output->push_back(point_rgba);
+    // }
+
+    // return cloud_output;
+}
+
+// #include "chrono.h"
+#include <chrono>
+// auto start_time = std::chrono::steady_clock::now();
+// end_time = std::chrono::steady_clock::now();
+// elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+// std::cout << "画框  elapsed time: " << elapsed_time.count() << " ms" << std::endl;
+
 void MainWindow::show_dect_data(DectData msg)
 {
-    //    return;
+
+    lidar_cnt++;
+
+    auto start_time = std::chrono::steady_clock::now();
+
     paint_area->xCloud->clear();
     *paint_area->xCloud = *msg.Origin_Cloud;
     paint_area->update();
 
+    auto end_time = std::chrono::steady_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    // std::cout << "paint_area 1 elapsed time: " << elapsed_time.count() << " ms" << std::endl;
+
     this->viewer->removeAllPointClouds();
     this->viewer->removeAllShapes();
 
+    end_time = std::chrono::steady_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    // std::cout << "removeAllPointClouds elapsed time: " << elapsed_time.count() << " ms" << std::endl;
+
     std::string ori_cloud_name = "ori_cloud";
-    this->viewer->addPointCloud(msg.Origin_Cloud, ori_cloud_name);
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_color(new pcl::PointCloud<pcl::PointXYZRGBA>);
+    *cloud_color = *RenderColor(msg.Origin_Cloud);
+
+    end_time = std::chrono::steady_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    // std::cout << "RenderColor elapsed time: " << elapsed_time.count() << " ms" << std::endl;
+
+    // 将点云的高度属性与点的颜色值关联起来
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZRGBA> handler(cloud_color, "z");
+    // 添加点云到可视化窗口
+    this->viewer->addPointCloud<pcl::PointXYZRGBA>(cloud_color, handler, ori_cloud_name);
+
+    // pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> color_handler(msg.Origin_Cloud, "intensity");
+    // this->viewer->addPointCloud(msg.Origin_Cloud, color_handler, ori_cloud_name);
+
+    // this->viewer->addPointCloud(cloud_color, ori_cloud_name);
+
+    // 设置颜色映射表
+    this->viewer->setPointCloudRenderingProperties(
+        pcl::visualization::PCL_VISUALIZER_LUT_RANGE, task_list_ui->get_show_lidar_height_min(), task_list_ui->get_show_lidar_height_max(), ori_cloud_name);
+
+    end_time = std::chrono::steady_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    // std::cout << "颜色值关联 显示  elapsed time: " << elapsed_time.count() << " ms" << std::endl;
 
     int i{0};
     for (auto dat : msg.ObjCloud_vec)
     {
-        // *dat;
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_color_(new pcl::PointCloud<pcl::PointXYZRGBA>);
+        *cloud_color_ = *RenderColor(dat);
         std::string det_cloud_name = "det_cloud_" + std::to_string(i);
-        this->viewer->addPointCloud(dat, det_cloud_name);
+        this->viewer->addPointCloud(cloud_color_, det_cloud_name);
         i++;
     }
+    ///////////////////////////////////////////////////////////////
 
-    for (auto dat : msg.Data_vec)
+    // std::vector<SendObjectInf> Data_vec_solo;
+    // for (int i{0}; msg.Data_vec.size() > i; i++)
+    // {
+    //     int cnt_same{0};
+    //     auto cur_str = std::to_string(msg.Data_vec[i].center_x);
+    //     for (int j{0}; msg.Data_vec.size() > j; j++)
+    //     {
+    //         if (cur_str == std::to_string(msg.Data_vec[j].center_x))
+    //         {
+    //             cnt_same++;
+    //         }
+    //     }
+    //     if (cnt_same == 1)
+    //     {
+    //         Data_vec_solo.push_back(msg.Data_vec[i]);
+    //     }
+    //     if (cnt_same > 1)
+    //     {
+    //         int exsit{0};
+    //         for (auto &dat_sma : Data_vec_solo)
+    //         {
+    //             if (std::to_string(dat_sma.center_x) == std::to_string(msg.Data_vec[i].center_x))
+    //             {
+    //                 exsit = 1;
+    //                 if (dat_sma.id < msg.Data_vec[i].id)
+    //                 {
+    //                     dat_sma.id = msg.Data_vec[i].id;
+    //                 }
+    //             }
+    //         }
+    //         if (exsit == 0)
+    //         {
+    //             Data_vec_solo.push_back(msg.Data_vec[i]);
+    //         }
+    //     }
+    // }
+
+    ///////////////////////////////////////////////////////////////
+
+    for (auto dat : msg.Data_vec) // Data_vec_solo  msg.Data_vec
     {
+
         std::string cube = "box" + std::to_string(i);
         Eigen::Vector3f translation(dat.center_x, dat.center_y, dat.center_z);
-        Eigen::Quaternionf rotation(1, 0, 0, 0); //_cluster.heading * M_PI / 180.0
-        this->viewer->addCube(translation, rotation, dat.length, dat.width, dat.height, cube);
-        this->viewer->setRepresentationToWireframeForAllActors();
+        Eigen::Quaternionf quat = Eigen::Quaternionf::Identity();
+
+        // Eigen::Quaternionf rotation(1, 0, 0, 0); //_cluster.heading * M_PI / 180.0
+        quat = Eigen::AngleAxisf(dat.heading, Eigen::Vector3f::UnitZ()) * quat;
+        this->viewer->addCube(translation, quat, dat.length, dat.width, dat.height, cube);
+
+        // 设置线条属性
+        this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, cube);
+        // this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, line_width, );
+
+        // this->viewer->setRepresentationToWireframeForAllActors();
+        // this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.15, cube);
 
         if (dat.kind_risk == "clash")
         {
@@ -181,12 +371,15 @@ void MainWindow::show_dect_data(DectData msg)
         switch (dat.classify)
         {
         case 0:
-            classify_name = "other";
-            break;
-        case 2:
-            classify_name = "AMR";
+            classify_name = "none";
             break;
         case 1:
+            classify_name = "vehicle";
+            break;
+        case 2:
+            classify_name = "non-vehicle";
+            break;
+        case 3:
             classify_name = "people";
             break;
         default:
@@ -204,46 +397,52 @@ void MainWindow::show_dect_data(DectData msg)
             return str;
         };
 
-        if (task_list_ui->RB_line_show_distance->isChecked())
+        sum_text = sum_text + "id : " + std::to_string(dat.id) + "\n";
+
+        if (task_list_ui->get_show_distance())
         {
-            sum_text = sum_text + trimDecimal(std::to_string(dat.distance)) + "\n";
+            sum_text = sum_text + "pos : (" + trimDecimal(std::to_string(dat.center_x)) + " ," + trimDecimal(std::to_string(dat.center_y)) + " ," + trimDecimal(std::to_string(dat.center_z)) + ")\n";
         }
 
-        if (task_list_ui->RB_line_show_classify->isChecked())
+        if (task_list_ui->get_show_classify())
         {
-            sum_text = sum_text + "classify : " + classify_name + "\n";
+            sum_text = sum_text + "type : " + classify_name + "\n";
         }
 
-        if (task_list_ui->RB_line_show_velocity->isChecked())
+        if (task_list_ui->get_show_velocity())
         {
             sum_text = sum_text + "speed : " + trimDecimal(std::to_string(dat.speed)) + "\n";
         }
 
-        if (!task_list_ui->RB_line_show_is_open->isChecked())
+        if (!task_list_ui->get_show_is_open())
         {
             sum_text = std::string();
         }
-
+        // this->viewer->setRepresentationToWireframeForAllActors();
+        // this->viewer->setRepresentationToSurfaceForAllActors();
         this->viewer->addText3D(sum_text, linesLCenterPoint,
-                                std::stod(task_list_ui->LM_line_show_box_size->text().toStdString() == std::string() ? std::string("1") : task_list_ui->LM_line_show_box_size->text().toStdString()),
+                                task_list_ui->get_show_box_size(),
                                 1, 1, 0, "line1Text3D_" + std::to_string(i));
-        this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.4, cube);
+        this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_SURFACE, "line1Text3D_" + std::to_string(i));
+        // this->viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.2, cube);
         i++;
     }
+
+    end_time = std::chrono::steady_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    // std::cout << "画框  elapsed time: " << elapsed_time.count() << " ms" << std::endl;
 
     // 2D paint
     vector<vector<PointT>> areaPoints;
     for (int i{0}; AREAS > i; i++)
     {
         vector<PointT> linePoints;
-        //        Point.x = this->paint_area->area[i].Area2D_point_T.x;
-        //        LinePoints.push_back(this->paint_area->area[i].Area2D_point_T);
         for (int j{0}; this->paint_area->area[i].Area2D_point_T.size() > j; j++)
         {
             PointT point;
             point.x = this->paint_area->area[i].Area2D_point_T[j].x;
             point.y = this->paint_area->area[i].Area2D_point_T[j].y;
-            point.z = this->paint_area->area[i].Area2D_point_T[j].z;
+            point.z = this->paint_area->area[i].Area2D_point_T[j].z - task_list_ui->get_plane_D_data();
             linePoints.push_back(point);
         }
         areaPoints.push_back(linePoints);
@@ -260,23 +459,33 @@ void MainWindow::show_dect_data(DectData msg)
         }
     }
 
+    end_time = std::chrono::steady_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    // std::cout << "画线 显示  elapsed time: " << elapsed_time.count() << " ms" << std::endl;
+
     this->viewer->getRenderWindow()->GetRenderers()->GetFirstRenderer()->Render();
     this->viewer->getRenderWindow()->Render();
     qvtkOpenglNativeWidget->update();
-    // std::cout << "*******************************" << std::endl;
+
+    // 计算函数执行耗时
+    end_time = std::chrono::steady_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    std::cout << "算法点云数据处理 elapsed time: " << elapsed_time.count() << " ms" << std::endl;
 }
 
 void MainWindow::receive_lidar_driver(PointCloudTPtr msg)
 {
-
     paint_area->xCloud->clear();
     *paint_area->xCloud = *msg;
     paint_area->update();
 
     std::string name = "All_cloud";
-    this->viewer->removePointCloud(name);
-    this->viewer->addPointCloud(msg, name);
-    this->viewer->updatePointCloud(msg, name);
+    this->viewer->removeAllPointClouds();
+    this->viewer->removeAllShapes();
+    // this->viewer->addPointCloud(msg, name);
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> color_handler(msg, "intensity");
+    this->viewer->addPointCloud(msg, color_handler, name);
+    this->viewer->updatePointCloud(msg, color_handler, name);
 
     this->viewer->getRenderWindow()->GetInteractor()->Render();
     qvtkOpenglNativeWidget->update();
@@ -348,7 +557,6 @@ void MainWindow::mainLayOut()
     body_layout->addLayout(right_body_layout);
     body_layout->setStretchFactor(left_body_layout, 9);
     body_layout->setStretchFactor(right_body_layout, 6);
-
 
     cameraLayout->addWidget(camera_viewer2);
     frameWidgetCamera->setLayout(cameraLayout);
@@ -428,6 +636,7 @@ void MainWindow::initMenu()
 
     param_set = new QAction(tr("&参数配置"), this);
     lidar_area_set = new QAction(tr("&区域绘制"), this);
+    camera_control_ac = new QAction(tr("&相机控制"), this);
 
     save_point_cloud = new QAction(tr("&保存点云"), this);
     svae_background_pont_cloud = new QAction(tr("&保存背景点云"), this);
@@ -442,6 +651,7 @@ void MainWindow::initMenu()
     connect(save_point_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_cloud_set_Action()));
     connect(svae_background_pont_cloud, SIGNAL(triggered(bool)), this, SLOT(save_point_backgourd_cloud_set_Action()));
     connect(qt_version, SIGNAL(triggered(bool)), my_app, SLOT(aboutQt()));
+    connect(camera_control_ac, SIGNAL(triggered(bool)), this, SLOT(camera_control_Action()));
 }
 
 void MainWindow::initToolBar()
@@ -462,6 +672,7 @@ void MainWindow::initToolBar()
 
     fileToolBar->addAction(param_set);
     fileToolBar->addAction(lidar_area_set);
+    fileToolBar->addAction(camera_control_ac);
 
     fileToolBar->addSeparator();
 
@@ -501,13 +712,15 @@ void MainWindow::initConnect()
     QObject::connect(this, SIGNAL(emit_save_point_backgourd_cloud(int)), ros_talk, SLOT(save_point_backgroud_cloud(int)));
     QObject::connect(ros_talk, SIGNAL(emit_alarm_data(AlarmStatus)), alarm, SLOT(setLEDStatus(AlarmStatus)));
 
-
-
     //    connect (m_buttonGroup, SIGNAL (buttonClicked(int)), this, SLOT(onBtnFunc(int)));void setViewerMode(int);
-    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer, SLOT(setCameraMat(QPixmap,QString)));
-    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap,QString)), camera_viewer2, SLOT(setCameraMat(QPixmap,QString)));
+    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap, QString)), camera_viewer, SLOT(setCameraMat(QPixmap, QString)));
+    QObject::connect(ros_talk, SIGNAL(emit_camera_drive(QPixmap, QString)), camera_viewer2, SLOT(setCameraMat(QPixmap, QString)));
     QObject::connect(task_list_ui->block_camera_mode, SIGNAL(buttonClicked(int)), camera_viewer, SLOT(setViewerMode(int)));
     QObject::connect(task_list_ui->block_camera_mode, SIGNAL(buttonClicked(int)), camera_viewer2, SLOT(setViewerMode(int)));
+    QObject::connect(task_list_ui->type_camera_mode, SIGNAL(buttonClicked(int)), ros_talk, SLOT(setCameraTypeMode(int)));
+    QObject::connect(task_list_ui->type_lidar_mode, SIGNAL(buttonClicked(int)), ros_talk, SLOT(setLidarTypeMode(int)));
+
+    QObject::connect(camera_control, SIGNAL(emitCameraControlCmd(int)), ros_talk, SLOT(setCameraControlCmd(int)));
 
     // void setLEDStatus( const AlarmStatus& msg  );
     //    setAreaDatas(QList<QList<PointT>> msg);
@@ -563,8 +776,6 @@ void MainWindow::save_point_cloud_set_Action()
 
 void MainWindow::param_set_Action()
 {
-    //    this->add_lidar->show();
-    //    task_list_ui->show();
     for (int i = 0; i < paramsListLayout->count(); ++i)
     {
         QWidget *w = paramsListLayout->itemAt(i)->widget();
@@ -590,7 +801,6 @@ void MainWindow::view_mode_Action()
     camera_viewer2->setInputNum(CameraViewNub::CameraViewFir);
 }
 
-
 void MainWindow::view_mode1_Action()
 {
     deleteItem(body_frame_layout);
@@ -604,6 +814,11 @@ void MainWindow::view_mode2_Action()
 
     camera_viewer->setInputNum(CameraViewNub::CameraViewSec);
     camera_viewer2->setInputNum(CameraViewNub::CameraViewSec);
+}
+
+void MainWindow::camera_control_Action()
+{
+    camera_control->show();
 }
 
 CameraViewer *MainWindow::getCameraWidget()
